@@ -1,0 +1,29 @@
+:root {
+  --bg: #F2F2F2;
+  --surface: #FFFFFF;
+  --ink: #183345;
+  --muted: #526573;
+  --primary: #035AA6;
+  --sky: #049DD9;
+  --cyan: #04B2D9;
+  --warm: #F2C438;
+  --primary-hover: color-mix(in srgb, var(--primary) 88%, #000);
+  --sky-tint: color-mix(in srgb, var(--sky) 12%, #fff);
+  --warm-tint: color-mix(in srgb, var(--warm) 20%, #fff);
+  --line: color-mix(in srgb, var(--ink) 14%, #fff);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-primary: var(--primary);
+  --color-sky: var(--sky);
+  --color-cyan: var(--cyan);
+  --color-warm: var(--warm);
+  --color-primary-hover: var(--primary-hover);
+  --color-sky-tint: var(--sky-tint);
+  --color-warm-tint: var(--warm-tint);
+  --color-line: var(--line);
+}
