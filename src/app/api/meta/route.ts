@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getEnv } from "@/lib/env";
 import { getServices, getStatus } from "@/lib/vpnApi";
-import { quotaSnapshot } from "@/lib/firestore";
+import { quotaSnapshot } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
 
@@ -13,10 +13,20 @@ export async function GET() {
   const stale = (serviceResult.status === "fulfilled" && serviceResult.value.stale)
     || (statusResult.status === "fulfilled" && statusResult.value.stale);
   const unavailable = serviceResult.status === "rejected" || statusResult.status === "rejected" || stale;
+  
+  let quota = {};
+  let quotaUnavailable = false;
+  try {
+    quota = await quotaSnapshot(services, new Date(), env.DAILY_LIMIT_PER_SERVICE);
+  } catch (err) {
+    quotaUnavailable = true;
+  }
+
   return NextResponse.json({ data: {
     services,
     status,
-    quota: await quotaSnapshot(services, new Date(), env.DAILY_LIMIT_PER_SERVICE),
+    quota,
+    quotaUnavailable,
     unavailable,
     stale,
     allowed_days: env.ALLOWED_DAYS,

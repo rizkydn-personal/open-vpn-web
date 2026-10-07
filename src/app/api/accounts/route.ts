@@ -3,8 +3,9 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getEnv } from "@/lib/env";
 import { ApiError, createAccount, getServices } from "@/lib/vpnApi";
-import { clientIpHash, finishCreateAttempt, reserveCreateAttempt, verifyTurnstile } from "@/lib/rateLimit";
-import { releaseQuota, reserveQuota } from "@/lib/firestore";
+import { clientIpHash, reserveCreateAttempt, verifyTurnstile } from "@/lib/rateLimit";
+import { checkRequestGuard } from "@/lib/requestGuard";
+import { releaseQuota, reserveQuota } from "@/lib/store";
 import { nextResetAt } from "@/lib/time";
 
 export const dynamic = "force-dynamic";
@@ -21,10 +22,20 @@ function logCreate(service: string, days: number, ipHash: string, outcome: strin
   console.log(JSON.stringify({ ts: new Date().toISOString(), service, days, ip_hash: ipHash, outcome }));
 }
 
-export async function POST(request: Request) {
+async function handlePost(request: Request) {
   const env = getEnv();
+  const guard = await checkRequestGuard(request);
+  if (!guard.ok) return error(guard.status, guard.code, guard.message);
+  
+  let rawText = "";
   let raw: unknown;
-  try { raw = await request.json(); }
+  try { 
+    rawText = await request.text(); 
+    if (rawText.length > 2048) {
+       return error(413, "payload_too_large", "Payload too large");
+    }
+    raw = JSON.parse(rawText);
+  }
   catch { return error(422, "invalid_request", "Permintaan tidak valid."); }
   const parsed = bodySchema.safeParse(raw);
   if (!parsed.success) return error(422, "invalid_request", "Layanan atau durasi tidak valid.");
@@ -32,7 +43,7 @@ export async function POST(request: Request) {
   let catalog;
   try { catalog = await getServices(); }
   catch { return error(503, "service_unavailable", "Server sedang tidak dapat dihubungi."); }
-  // A cached catalog remains usable while its background refresh runs.
+  
   const service = catalog.value.find((item) => item.id === parsed.data.service);
   if (!service || !service.available || !env.ALLOWED_DAYS.includes(parsed.data.days as 1 | 3 | 7)
       || (service.max_days !== undefined && parsed.data.days > service.max_days)) {
@@ -47,10 +58,9 @@ export async function POST(request: Request) {
 
   const now = new Date();
   const attempt = await reserveCreateAttempt(request.headers, service.id, now, env);
-  if (!attempt.ok) return error(429, "rate_limited", "Batas pembuatan akun sementara tercapai. Coba lagi nanti.", { "Retry-After": "3600" });
+  if (!attempt.ok) return error(429, "rate_limited", "Batas pembuatan akun sementara tercapai. Coba lagi nanti.", { "Retry-After": String(attempt.retryAfter) });
   const reservation = await reserveQuota(service.id, now, env.DAILY_LIMIT_PER_SERVICE);
   if (!reservation.ok) {
-    finishCreateAttempt(attempt.logId, "fail");
     const ipHash=clientIpHash(request.headers, env);
     logCreate(service.id, parsed.data.days, ipHash, "quota_exhausted");
     return NextResponse.json({ error: { code: "quota_exhausted", message: "Kuota layanan hari ini habis." }, data: { used: reservation.used, limit: env.DAILY_LIMIT_PER_SERVICE, resetsAt: nextResetAt(now).toISOString() } }, { status: 409, headers: { "Cache-Control": "no-store" } });
@@ -66,21 +76,34 @@ export async function POST(request: Request) {
       if (!(first instanceof ApiError) || !first.retryable) throw first;
       result = await createAccount({ service: service.id, days: parsed.data.days, username }, idempotencyKey);
     }
-    finishCreateAttempt(attempt.logId, "ok");
     logCreate(service.id, parsed.data.days, clientIpHash(request.headers, env), "ok");
     return NextResponse.json({ data: result }, { status: 201, headers: { "Cache-Control": "no-store" } });
   } catch (cause) {
     console.error(JSON.stringify({ event: "account_create_failed", error: cause instanceof Error ? cause.message : String(cause) }));
     if (cause instanceof ApiError && cause.uncertain) {
-      finishCreateAttempt(attempt.logId, "unknown");
       logCreate(service.id, parsed.data.days, clientIpHash(request.headers, env), "unknown");
       return error(504, "creation_unknown", "Status pembuatan tidak pasti, coba lagi beberapa menit.");
     }
     await releaseQuota(service.id, reservation.day);
-    finishCreateAttempt(attempt.logId, "fail");
     logCreate(service.id, parsed.data.days, clientIpHash(request.headers, env), "fail");
     if (cause instanceof ApiError && cause.status === 409) return error(409, "conflict", "Akun tidak dapat dibuat. Coba kembali.");
     if (cause instanceof ApiError && cause.status === 422) return error(422, "invalid_request", "Layanan atau durasi tidak tersedia.");
     return error(503, "service_unavailable", "Server sedang tidak dapat membuat akun. Kuota telah dikembalikan.");
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    return await handlePost(request);
+  } catch (err: any) {
+    console.error("POST handler error:", err);
+    if (err.message && err.message.includes("Firestore is not configured")) {
+      return error(503, "store_unavailable", "Layanan sementara tidak tersedia (store error).");
+    }
+    // Also catch network errors to firestore or other unhandled exceptions
+    if (err.code === "UNAVAILABLE" || err.message?.includes("store")) {
+      return error(503, "store_unavailable", "Layanan sementara tidak tersedia (store error).");
+    }
+    return error(500, "internal_error", "Terjadi kesalahan sistem internal.");
   }
 }
