@@ -3,7 +3,7 @@ import { z } from "zod";
 import { getApiServers, getEnv } from "@/lib/env";
 
 const serviceSchema = z.object({
-  id: z.string(),
+  id: z.string().regex(/^[a-z0-9][a-z0-9-]{0,40}$/),
   label: z.string(),
   available: z.boolean(),
   reason: z.string().nullable().optional(),
@@ -59,6 +59,7 @@ async function request<T>(path: string, schema: z.ZodType<T>, timeoutMs: number,
   const env = getEnv();
   let last: unknown;
   let timedOut = false;
+  const isPost = init?.method === "POST";
   for (const server of getApiServers(env)) {
    const controller = new AbortController();
    const timeout = setTimeout(() => { timedOut = true; controller.abort(); }, timeoutMs);
@@ -85,10 +86,12 @@ async function request<T>(path: string, schema: z.ZodType<T>, timeoutMs: number,
     const parsed = schema.safeParse(payload);
     if (!parsed.success) throw new ApiError("invalid_response", 502, false);
     return parsed.data;
-  } catch (error) {
-    last = error;
-    if (error instanceof ApiError && !error.retryable) throw error;
-    continue;
+    } catch (error) {
+      last = error;
+      if (error instanceof ApiError && !error.retryable) throw error;
+      // A POST that timed out or reached an upstream server may already have created an account.
+      if (isPost && (timedOut || error instanceof ApiError)) break;
+      continue;
    } finally {
     clearTimeout(timeout);
    }

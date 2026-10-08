@@ -5,7 +5,7 @@ import type { Service, ServerStatus } from "@/lib/vpnApi";
 import { ServiceIcon } from "@/components/ServiceIcon";
 import { AccountForm } from "@/components/AccountForm";
 
-export type Meta = { services: Service[]; status: ServerStatus | null; quota: Record<string, {used:number;limit:number;remaining:number;resetsAt:string}>; unavailable: boolean; allowed_days: Array<1|3|7>; support_url?: string; turnstile_site_key?: string };
+export type Meta = { services: Service[]; status: ServerStatus | null; quota: Record<string, {used:number;limit:number;remaining:number;resetsAt:string}>; quotaUnavailable?: boolean; unavailable: boolean; allowed_days: Array<1|3|7>; support_url?: string; turnstile_site_key?: string };
 function countdown(iso?: string, now?: number) { if (!iso || now === undefined) return "--:--:--"; const s=Math.max(0,Math.floor((Date.parse(iso)-now)/1000)); return `${String(Math.floor(s/3600)).padStart(2,"0")}:${String(Math.floor(s%3600/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`; }
 export function Portal({ initial, serviceId }: { initial: Meta; serviceId?: string }) {
   const [meta,setMeta]=useState(initial); const [tick,setTick]=useState<number | null>(null);

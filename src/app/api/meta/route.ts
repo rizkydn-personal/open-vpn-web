@@ -13,10 +13,14 @@ export async function GET() {
   const stale = (serviceResult.status === "fulfilled" && serviceResult.value.stale)
     || (statusResult.status === "fulfilled" && statusResult.value.stale);
   const unavailable = serviceResult.status === "rejected" || statusResult.status === "rejected" || stale;
+  let quota = {};
+  let quotaUnavailable = false;
+  try { quota = await quotaSnapshot(services, new Date(), env.DAILY_LIMIT_PER_SERVICE); } catch { quotaUnavailable = true; }
   return NextResponse.json({ data: {
     services,
     status,
-    quota: await quotaSnapshot(services, new Date(), env.DAILY_LIMIT_PER_SERVICE),
+    quota,
+    quotaUnavailable,
     unavailable,
     stale,
     allowed_days: env.ALLOWED_DAYS,
