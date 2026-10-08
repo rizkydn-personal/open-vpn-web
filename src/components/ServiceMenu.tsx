@@ -3,7 +3,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronDown, Menu } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { usePathname } from "next/navigation";
 import type { ServerGroup } from "@/lib/serverDirectory";
 import type { Service } from "@/lib/vpnApi";
 import { ServiceIcon } from "@/components/ServiceIcon";

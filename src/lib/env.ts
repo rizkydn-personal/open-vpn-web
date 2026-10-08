@@ -106,7 +106,6 @@ export function getApiServers(env: AppEnv = getEnv()): ApiServer[] {
   }
 }
 
-let memoizedEnv: AppEnv | null = null;
 export function getEnv(): AppEnv {
   if (cachedEnv) return cachedEnv;
   const parsed = envSchema.safeParse(process.env);
