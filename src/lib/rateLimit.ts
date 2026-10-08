@@ -17,33 +17,72 @@ export function normalizeIp(value: string | null): string | null {
     const [head, tail = ""] = address.split("::");
     const left = head ? head.split(":") : [];
     const right = tail ? tail.split(":") : [];
-    return [...left, ...Array(Math.max(0, 8 - left.length - right.length)).fill("0"), ...right].map((group) => group.padStart(4, "0")).slice(0, 4).join(":");
+    return [...left, ...Array(Math.max(0, 8 - left.length - right.length)).fill("0"), ...right]
+      .map((group) => group.padStart(4, "0"))
+      .slice(0, 4)
+      .join(":");
   }
   return null;
 }
 
 function clientIp(headers: Headers, env: AppEnv): string {
-  const raw = env.TRUST_PROXY_HEADERS ? headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null : headers.get("x-real-ip")?.trim() ?? null;
+  const raw = env.TRUST_PROXY_HEADERS
+    ? (headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null)
+    : (headers.get("x-real-ip")?.trim() ?? null);
   const normalized = normalizeIp(raw);
   if (normalized) return normalized;
-  if (process.env.NODE_ENV === "production" && Date.now() - lastMissingIpLog > 60_000) { console.warn(JSON.stringify({ event: "ip_missing" })); lastMissingIpLog = Date.now(); }
-  return process.env.NODE_ENV === "development" ? `dev:${headers.get("user-agent")?.slice(0, 128) ?? "unknown"}` : "missing";
+  if (process.env.NODE_ENV === "production" && Date.now() - lastMissingIpLog > 60_000) {
+    console.warn(JSON.stringify({ event: "ip_missing" }));
+    lastMissingIpLog = Date.now();
+  }
+  return process.env.NODE_ENV === "development"
+    ? `dev:${headers.get("user-agent")?.slice(0, 128) ?? "unknown"}`
+    : "missing";
 }
 
-export function clientIpHash(headers: Headers, env: AppEnv): string { return createHash("sha256").update(`${env.IP_HASH_SALT}:${clientIp(headers, env)}`).digest("hex"); }
+export function clientIpHash(headers: Headers, env: AppEnv): string {
+  return createHash("sha256")
+    .update(`${env.IP_HASH_SALT}:${clientIp(headers, env)}`)
+    .digest("hex");
+}
 
 export function reserveCreateAttempt(headers: Headers, service: string, now: Date, env: AppEnv) {
-  return reserveIpQuota(clientIpHash(headers, env), service, now, clientIp(headers, env) === "missing" ? 1 : env.PER_IP_CREATE_LIMIT_PER_HOUR, env.PER_IP_CREATE_LIMIT_PER_DAY);
+  return reserveIpQuota(
+    clientIpHash(headers, env),
+    service,
+    now,
+    clientIp(headers, env) === "missing" ? 1 : env.PER_IP_CREATE_LIMIT_PER_HOUR,
+    env.PER_IP_CREATE_LIMIT_PER_DAY,
+  );
 }
 
-export async function verifyTurnstile(token: string | null, remoteIp: string | null, env: AppEnv): Promise<boolean> {
+export async function verifyTurnstile(
+  token: string | null,
+  remoteIp: string | null,
+  env: AppEnv,
+): Promise<boolean> {
   if (!env.TURNSTILE_SITE_KEY && !env.TURNSTILE_SECRET_KEY) return true;
   if (!token || !env.TURNSTILE_SECRET_KEY) return false;
-  const controller = new AbortController(); const timeout = setTimeout(() => controller.abort(), 5000);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 5000);
   try {
-    const body = new URLSearchParams({ secret: env.TURNSTILE_SECRET_KEY, response: token }); const ip = normalizeIp(remoteIp); if (ip) body.set("remoteip", ip);
-    const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", { method: "POST", body, signal: controller.signal, cache: "no-store" });
+    const body = new URLSearchParams({ secret: env.TURNSTILE_SECRET_KEY, response: token });
+    const ip = normalizeIp(remoteIp);
+    if (ip) body.set("remoteip", ip);
+    const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+      method: "POST",
+      body,
+      signal: controller.signal,
+      cache: "no-store",
+    });
     if (!response.ok) return false;
-    const result: unknown = await response.json(); return Boolean(result && typeof result === "object" && "success" in result && result.success === true);
-  } catch { return false; } finally { clearTimeout(timeout); }
+    const result: unknown = await response.json();
+    return Boolean(
+      result && typeof result === "object" && "success" in result && result.success === true,
+    );
+  } catch {
+    return false;
+  } finally {
+    clearTimeout(timeout);
+  }
 }
