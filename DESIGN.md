@@ -7,6 +7,8 @@ Design Read: ENERGY 2, RHYTHM 3, MOTION 2. This is an Indonesian VPN account por
 ## Visual system
 
 - Use the fixed light palette: page `#F2F2F2`, surfaces `#FFFFFF`, primary text `#183345`, muted text `#526573`, primary action and focus `#035AA6`, graphic accent `#049DD9`, limited tint `#04B2D9`, and optional support or light-warning area `#F2C438`.
+- Use deep red `#B42318` only for form errors, always with a left rule and bold text so meaning does not rely on color. It passes AA on both the page and surface colors (checked by `npm run check:contrast`).
+- Show notices (stale data, partial outages) as an ink-on-warm-tint callout with a warm left rule, never as red body text, which fails contrast on the page background.
 - Keep the theme light because the specified palette is designed for light backgrounds and the portal is used on phones during the day.
 - Use one path line in deep blue to connect a device to a server, touching service points. Repeat it only in loading, 404, and maintenance views because it describes the product's connection tunnel.
 - Use Lucide icons only when they identify a service or communicate a real action; avoid decorative icons beside generic headings.

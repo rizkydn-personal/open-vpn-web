@@ -7,7 +7,7 @@
   --sky: #049dd9;
   --cyan: #04b2d9;
   --warm: #f2c438;
-  --danger: #DC3545;
+  --danger: #b42318;
   --primary-hover: color-mix(in srgb, var(--primary) 88%, #000);
   --sky-tint: color-mix(in srgb, var(--sky) 12%, #fff);
   --warm-tint: color-mix(in srgb, var(--warm) 20%, #fff);

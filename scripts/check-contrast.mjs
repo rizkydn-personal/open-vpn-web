@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 
 const css = await readFile(new URL("../src/styles/tokens.css", import.meta.url), "utf8");
-const tokenNames = ["bg", "surface", "ink", "muted", "primary", "sky", "cyan", "warm"];
+const tokenNames = ["bg", "surface", "ink", "muted", "primary", "sky", "cyan", "warm", "danger"];
 const tokens = Object.fromEntries(
   tokenNames.map((name) => {
     const match = css.match(new RegExp(`--${name}:\\s*(#[0-9A-Fa-f]{6})\\s*;`));
@@ -36,6 +36,8 @@ const pairs = [
   ["ink", "warm", 4.5],
   ["ink", "cyan", 4.5],
   ["ink", "sky", 3],
+  ["danger", "bg", 4.5],
+  ["danger", "surface", 4.5],
 ];
 let failed = false;
 for (const [foreground, background, minimum] of pairs) {
