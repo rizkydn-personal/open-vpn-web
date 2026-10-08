@@ -3,6 +3,7 @@ import { getEnv } from "@/lib/env";
 import { getServices, getStatus } from "@/lib/vpnApi";
 import { getSiteSettings, quotaSnapshot } from "@/lib/firestore";
 import type { Meta } from "@/components/Portal";
+
 export async function initialMeta(): Promise<Meta> {
   const env = getEnv();
   const [s, t, site] = await Promise.allSettled([getServices(), getStatus(), getSiteSettings()]);

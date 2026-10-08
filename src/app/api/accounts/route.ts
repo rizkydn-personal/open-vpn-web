@@ -185,3 +185,19 @@ export async function POST(request: Request) {
     return error(500, "internal_error");
   }
 }
+
+export async function POST(request: Request) {
+  try {
+    return await handlePost(request);
+  } catch (err: any) {
+    console.error("POST handler error:", err);
+    if (err.message && err.message.includes("Firestore is not configured")) {
+      return error(503, "store_unavailable", "Layanan sementara tidak tersedia (store error).");
+    }
+    // Also catch network errors to firestore or other unhandled exceptions
+    if (err.code === "UNAVAILABLE" || err.message?.includes("store")) {
+      return error(503, "store_unavailable", "Layanan sementara tidak tersedia (store error).");
+    }
+    return error(500, "internal_error", "Terjadi kesalahan sistem internal.");
+  }
+}
