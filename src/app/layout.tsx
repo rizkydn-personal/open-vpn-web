@@ -1,20 +1,23 @@
 import type { Metadata, Viewport } from "next";
 import Link from "next/link";
 import { Navbar } from "@/components/Navbar";
+import { getEnv } from "@/lib/env";
 import "./globals.css";
 
+const description =
+  "Portal untuk membuat akun VPN. Detail koneksi tersedia sementara di tab browser agar dapat disalin atau diunduh.";
 export const metadata: Metadata = {
   title: { default: "VPN Gratis | Portal Akun VPN", template: "%s | VPN Gratis" },
-  description:
-    "Buat akun VPN gratis dengan kuota harian. Detail koneksi ditampilkan sekali dan tidak disimpan di server.",
-  openGraph: {
-    title: "VPN Gratis | Portal Akun VPN",
-    description: "Buat akun VPN gratis dengan kuota harian.",
-  },
+  description,
+  ...(process.env.SITE_URL && /^https?:\/\//.test(process.env.SITE_URL)
+    ? { metadataBase: new URL(process.env.SITE_URL) }
+    : {}),
+  openGraph: { title: "VPN Gratis | Portal Akun VPN", description },
 };
 export const viewport: Viewport = { themeColor: "#035AA6" };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const supportUrl = getEnv().SUPPORT_URL;
   return (
     <html lang="id">
       <body>
@@ -28,10 +31,16 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <footer className="site-footer">
           <div className="site-footer__inner">
             <p>
-              © {new Date().getFullYear()} VPN Gratis. Gunakan layanan dengan bertanggung jawab.
+              © {new Date().getFullYear()} rnpproject. Gunakan layanan dengan bertanggung jawab.
             </p>
             <nav aria-label="Tautan footer">
-              <Link href="/ketentuan">Ketentuan</Link> · <Link href="/privasi">Privasi</Link>
+              <Link href="/ketentuan">Ketentuan</Link>
+              <Link href="/privasi">Privasi</Link>
+              {supportUrl ? (
+                <a href={supportUrl} target="_blank" rel="noopener noreferrer">
+                  Dukungan <span className="sr-only">(membuka tab baru)</span>
+                </a>
+              ) : null}
             </nav>
           </div>
         </footer>

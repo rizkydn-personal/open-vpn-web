@@ -41,7 +41,7 @@ const envSchema = z
     SITE_URL: z.string().default(""),
     TURNSTILE_SITE_KEY: z.string().default(""),
     TURNSTILE_SECRET_KEY: z.string().default(""),
-    VPN_API_GET_TIMEOUT_MS: z.coerce.number().int().positive().default(8000),
+    VPN_API_GET_TIMEOUT_MS: z.coerce.number().int().positive().default(4000),
     VPN_API_POST_TIMEOUT_MS: z.coerce.number().int().positive().default(20000),
   })
   .refine((value) => Boolean(value.TURNSTILE_SITE_KEY) === Boolean(value.TURNSTILE_SECRET_KEY), {
@@ -49,7 +49,14 @@ const envSchema = z
   });
 
 export type AppEnv = z.infer<typeof envSchema>;
-export type ApiServer = { id: string; baseUrl: string; apiKey: string; label?: string };
+export type ApiServer = {
+  id: string;
+  baseUrl: string;
+  apiKey: string;
+  label?: string;
+  location?: string;
+  dailyLimit?: number;
+};
 let cachedEnv: AppEnv | undefined;
 let warnedSupport = false;
 let warnedTurnstile = false;
@@ -72,11 +79,22 @@ export function getApiServers(env: AppEnv = getEnv()): ApiServer[] {
       const baseUrl = typeof value.baseUrl === "string" ? value.baseUrl.replace(/\/+$/, "") : "";
       const apiKey = typeof value.apiKey === "string" ? value.apiKey.trim() : "";
       if (!isSafeApiUrl(baseUrl) || !apiKey) throw new Error(`server ${index + 1} tidak valid`);
+      const id = typeof value.id === "string" && value.id ? value.id : `server-${index + 1}`;
+      if (!/^[a-z0-9][a-z0-9-]{0,30}$/.test(id))
+        throw new Error(`id server ${index + 1} tidak valid`);
+      const dailyLimit = value.dailyLimit;
+      if (dailyLimit !== undefined && (!Number.isInteger(dailyLimit) || Number(dailyLimit) < 1))
+        throw new Error(`dailyLimit server ${index + 1} tidak valid`);
       return {
-        id: typeof value.id === "string" && value.id ? value.id : `server-${index + 1}`,
+        id,
         baseUrl,
         apiKey,
         label: typeof value.label === "string" ? value.label : undefined,
+        location:
+          typeof value.location === "string" && value.location.trim()
+            ? value.location.trim().slice(0, 80)
+            : undefined,
+        dailyLimit: dailyLimit === undefined ? undefined : Number(dailyLimit),
       };
     });
     if (!servers.length) throw new Error("tidak ada server");
@@ -106,6 +124,15 @@ export function getEnv(): AppEnv {
       warnedSupport = true;
       env.SUPPORT_URL = "";
     }
+  if (env.SITE_URL) {
+    try {
+      const url = new URL(env.SITE_URL);
+      if (!["http:", "https:"].includes(url.protocol)) throw new Error();
+      env.SITE_URL = url.origin;
+    } catch {
+      throw new Error("SITE_URL harus berupa URL http(s) yang valid.");
+    }
+  }
   if (process.env.NODE_ENV === "production" && !env.TURNSTILE_SITE_KEY && !warnedTurnstile) {
     console.warn("Turnstile belum dikonfigurasi; perlindungan hanya mengandalkan rate limit.");
     warnedTurnstile = true;

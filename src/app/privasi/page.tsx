@@ -5,9 +5,9 @@ export default function Privasi() {
       <h1>Kebijakan privasi</h1>
       <p>Terakhir diperbarui: 8 Oktober 2026.</p>
       <p>
-        Kredensial akun tidak disimpan di server. Untuk keamanan dan pembatasan kuota, log server
-        dapat memuat waktu, layanan, durasi, hash IP bersalt, dan hasil permintaan. Counter kuota
-        memakai hash IP dan dihapus sesuai masa berlaku.
+        Aplikasi web tidak menyimpan kredensial hasil di database atau log. Untuk pembatasan
+        percobaan, log dapat memuat waktu, layanan, durasi, hash IP bersalt, dan hasil permintaan.
+        Counter pembatasan IP memakai hash dan dihapus sesuai masa berlaku.
       </p>
       <p>
         Jika diaktifkan, Cloudflare Turnstile memproses verifikasi keamanan. Salinan sementara

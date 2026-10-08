@@ -4,6 +4,7 @@ import { getServices } from "@/lib/vpnApi";
 import type { Service } from "@/lib/vpnApi";
 import { ServiceMenu } from "@/components/ServiceMenu";
 import { NavLinks } from "@/components/NavLinks";
+import { groupServicesByServer } from "@/lib/serverDirectory";
 
 export async function Navbar() {
   let services: Service[] = [];
@@ -12,6 +13,7 @@ export async function Navbar() {
   } catch {
     /* Show home only until service catalog is available. */
   }
+  const servers = groupServicesByServer(services).map(({ id, label }) => ({ id, label }));
   return (
     <header className="site-header">
       <div className="site-header__inner">
@@ -25,9 +27,9 @@ export async function Navbar() {
           </span>
         </Link>
         <nav className="desktop-nav" aria-label="Navigasi utama">
-          <NavLinks services={services} />
+          <NavLinks servers={servers} services={services} />
         </nav>
-        <ServiceMenu services={services} />
+        <ServiceMenu servers={servers} services={services} />
       </div>
     </header>
   );

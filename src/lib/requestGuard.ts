@@ -15,8 +15,23 @@ export function guardAccountRequest(request: Request): GuardFailure | null {
   const fetchSite = request.headers.get("sec-fetch-site");
   if (fetchSite && fetchSite !== "same-origin") return { status: 403, code: "forbidden_origin" };
   const origin = request.headers.get("origin");
-  if (origin && origin !== new URL(request.url).origin)
-    return { status: 403, code: "forbidden_origin" };
+  if (origin) {
+    let matches = false;
+    try {
+      const source = new URL(origin);
+      const target = new URL(request.url);
+      const host = request.headers.get("host");
+      const forwardedProtocol = request.headers.get("x-forwarded-proto")?.split(",")[0]?.trim();
+      const sameHost = Boolean(host && source.host === host);
+      const sameProtocol =
+        source.protocol === target.protocol ||
+        (sameHost && Boolean(forwardedProtocol) && source.protocol === `${forwardedProtocol}:`);
+      matches = source.origin === target.origin || (sameHost && sameProtocol);
+    } catch {
+      matches = false;
+    }
+    if (!matches) return { status: 403, code: "forbidden_origin" };
+  }
   if (
     !fetchSite &&
     !origin &&

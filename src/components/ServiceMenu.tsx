@@ -3,14 +3,27 @@ import Link from "next/link";
 import { ChevronDown, Menu } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
+import type { ServerGroup } from "@/lib/serverDirectory";
 import type { Service } from "@/lib/vpnApi";
 import { ServiceIcon } from "@/components/ServiceIcon";
 
-export function ServiceMenu({ services }: { services: Service[] }) {
+export function ServiceMenu({
+  servers,
+  services,
+}: {
+  servers: Pick<ServerGroup, "id" | "label">[];
+  services: Service[];
+}) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const root = useRef<HTMLDivElement>(null);
   const button = useRef<HTMLButtonElement>(null);
+  const selectedServiceId = pathname.match(/^\/s\/([^/]+)/)?.[1];
+  const selectedService = selectedServiceId
+    ? services.find((service) => service.id === decodeURIComponent(selectedServiceId))
+    : undefined;
+  const serverId = pathname.match(/^\/server\/([^/]+)/)?.[1] ?? selectedService?.server_id;
+  const currentServerServices = services.filter((service) => service.server_id === serverId);
   useEffect(() => {
     const outside = (event: PointerEvent) => {
       if (!root.current?.contains(event.target as Node)) setOpen(false);
@@ -41,10 +54,15 @@ export function ServiceMenu({ services }: { services: Service[] }) {
         aria-controls="service-menu"
         onClick={() => setOpen(!open)}
       >
-        <Menu size={19} aria-hidden="true" /> Layanan <ChevronDown size={16} aria-hidden="true" />
+        <Menu size={19} aria-hidden="true" /> {serverId ? "Layanan" : "Server"}{" "}
+        <ChevronDown size={16} aria-hidden="true" />
       </button>
       {open && (
-        <nav id="service-menu" className="mobile-menu__panel" aria-label="Layanan">
+        <nav
+          id="service-menu"
+          className="mobile-menu__panel"
+          aria-label={serverId ? "Navigasi layanan" : "Navigasi server"}
+        >
           <Link
             href="/"
             aria-current={pathname === "/" ? "page" : undefined}
@@ -52,23 +70,29 @@ export function ServiceMenu({ services }: { services: Service[] }) {
           >
             Beranda
           </Link>
-          {services.map((service) =>
-            service.available ? (
-              <Link
-                key={service.id}
-                href={`/s/${encodeURIComponent(service.id)}`}
-                aria-current={pathname === `/s/${service.id}` ? "page" : undefined}
-                onClick={() => setOpen(false)}
-              >
-                <ServiceIcon id={service.id} size={20} /> {service.label}
-              </Link>
-            ) : (
-              <span key={service.id} aria-disabled="true">
-                <ServiceIcon id={service.id} size={20} /> {service.label}
-                <small>{service.reason ?? "Tidak tersedia"}</small>
-              </span>
-            ),
-          )}
+          {serverId
+            ? currentServerServices.map((service) => (
+                <Link
+                  key={service.id}
+                  href={`/s/${encodeURIComponent(service.id)}`}
+                  aria-current={
+                    pathname === `/s/${encodeURIComponent(service.id)}` ? "page" : undefined
+                  }
+                  onClick={() => setOpen(false)}
+                >
+                  <ServiceIcon id={service.id} size={20} /> {service.service_label ?? service.label}
+                </Link>
+              ))
+            : servers.map((server) => (
+                <Link
+                  key={server.id}
+                  href={`/server/${encodeURIComponent(server.id)}`}
+                  aria-current={pathname === `/server/${server.id}` ? "page" : undefined}
+                  onClick={() => setOpen(false)}
+                >
+                  <span className="server-nav-mark" aria-hidden="true" /> {server.label}
+                </Link>
+              ))}
         </nav>
       )}
     </div>

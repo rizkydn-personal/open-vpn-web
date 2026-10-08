@@ -1,4 +1,6 @@
 import { randomUUID } from "node:crypto";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { NextRequest, NextResponse } from "next/server";
 
 export function proxy(request: NextRequest) {
@@ -22,7 +24,34 @@ export function proxy(request: NextRequest) {
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-nonce", nonce);
   requestHeaders.set("Content-Security-Policy", csp);
-  const response = NextResponse.next({ request: { headers: requestHeaders } });
+  const path = request.nextUrl.pathname;
+  const adminPath =
+    path === "/admin" ||
+    path.startsWith("/admin/") ||
+    path === "/api/admin" ||
+    path.startsWith("/api/admin/");
+  const statusPath = path === "/api/health";
+  const assetPath = /\.[a-z0-9]+$/i.test(path) || path.startsWith("/_next/");
+  const forced = process.env.FORCE_MAINTENANCE === "1" && !adminPath && !statusPath && !assetPath;
+  let response: NextResponse;
+  if (forced && path.startsWith("/api/")) {
+    response = NextResponse.json(
+      { error: { code: "maintenance", message: "Portal sedang dalam pemeliharaan." } },
+      { status: 503, headers: { "Cache-Control": "no-store", "Retry-After": "300" } },
+    );
+  } else if (forced) {
+    const html = readFileSync(resolve(process.cwd(), "public", "maintenance-static.html"));
+    response = new NextResponse(html, {
+      status: 503,
+      headers: {
+        "Content-Type": "text/html; charset=utf-8",
+        "Cache-Control": "no-store",
+        "Retry-After": "300",
+      },
+    });
+  } else {
+    response = NextResponse.next({ request: { headers: requestHeaders } });
+  }
   response.headers.set("Content-Security-Policy", csp);
   response.headers.set("Cross-Origin-Opener-Policy", "same-origin");
   response.headers.set("Cross-Origin-Resource-Policy", "same-origin");

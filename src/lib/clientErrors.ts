@@ -10,7 +10,7 @@ export function clientErrorMessage(
   if (code === "forbidden_origin" || status === 415 || status === 413)
     return "Permintaan ditolak. Muat ulang halaman lalu coba lagi.";
   if (code === "rate_limited")
-    return `Terlalu banyak percobaan. Coba lagi sekitar ${Math.max(1, Math.ceil(Number(retryAfter ?? 60) / 60))} menit lagi.`;
+    return `Terlalu banyak percobaan. Coba lagi sekitar ${Math.max(1, Math.ceil(Number(retryAfter ?? 60) / 60))} menit.`;
   if (code === "quota_exhausted")
     return "Kuota layanan hari ini sudah habis. Kuota direset pukul 00.00 WIB.";
   if (code === "conflict") return "Akun tidak dapat dibuat saat ini. Silakan coba lagi.";

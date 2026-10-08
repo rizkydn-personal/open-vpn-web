@@ -5,6 +5,7 @@ import { CopyButton } from "@/components/CopyButton";
 import { formatWib } from "@/lib/time";
 import { clientErrorMessage } from "@/lib/clientErrors";
 import { readStoredAccount, writeStoredAccount } from "@/lib/accountStorage";
+import { PathLoader } from "@/components/PathLoader";
 
 type Quota = { used: number; limit: number; remaining: number; resetsAt: string };
 function textValue(value: unknown): string {
@@ -37,12 +38,14 @@ export function AccountForm({
   service,
   days,
   quota,
+  quotaUnavailable = false,
   turnstileSiteKey,
   embedded = false,
 }: {
   service: Service;
   days: Array<1 | 3 | 7>;
   quota?: Quota;
+  quotaUnavailable?: boolean;
   turnstileSiteKey?: string;
   embedded?: boolean;
 }) {
@@ -53,6 +56,7 @@ export function AccountForm({
   const [token, setToken] = useState("");
   const widget = useRef<HTMLDivElement>(null);
   const widgetId = useRef<string | undefined>(undefined);
+  const resultHeading = useRef<HTMLHeadingElement>(null);
   const resultKey = `open-vpn-web:account-result:${service.id}`;
   useEffect(() => {
     try {
@@ -70,6 +74,9 @@ export function AccountForm({
       /* Storage may be disabled. */
     }
   }, [result, resultKey]);
+  useEffect(() => {
+    if (result) resultHeading.current?.focus();
+  }, [result]);
   useEffect(() => {
     if (!turnstileSiteKey || !widget.current) return;
     let cancelled = false;
@@ -159,8 +166,12 @@ export function AccountForm({
   if (result)
     return (
       <section className="panel result-card" aria-live="polite">
-        <h2>Akun berhasil dibuat</h2>
-        <p className="notice">Simpan sekarang — data ini tidak disimpan di situs ini.</p>
+        <h2 ref={resultHeading} tabIndex={-1}>
+          Akun berhasil dibuat
+        </h2>
+        <p className="notice">
+          Detail akun tersimpan sementara di tab ini, maksimal 30 menit. Salin atau unduh sekarang.
+        </p>
         <p>
           <strong>Username:</strong> {result.username} <CopyButton value={result.username} />
         </p>
@@ -168,6 +179,15 @@ export function AccountForm({
           <strong>Berlaku sampai:</strong> {formatWib(result.expires_at)}
         </p>
         <Connection data={result.connection} />
+        <CopyButton
+          label="Salin semua detail"
+          value={[
+            `Username: ${result.username}`,
+            ...Object.entries(result.connection).map(
+              ([key, value]) => `${key}: ${textValue(value)}`,
+            ),
+          ].join("\n")}
+        />
         <button className="button-secondary" onClick={() => setResult(null)}>
           Buat lagi
         </button>
@@ -204,6 +224,11 @@ export function AccountForm({
           <div ref={widget} aria-label="Verifikasi keamanan" />
         </div>
       )}
+      {quotaUnavailable ? (
+        <p className="form-error" role="status">
+          Kuota belum dapat diperiksa. Coba lagi beberapa saat.
+        </p>
+      ) : null}
       {quota?.remaining === 0 && (
         <p className="form-error">Kuota hari ini habis. Reset 00.00 WIB.</p>
       )}
@@ -214,10 +239,18 @@ export function AccountForm({
       )}
       <button
         className="button-primary"
-        disabled={busy || quota?.remaining === 0 || Boolean(turnstileSiteKey && !token)}
+        disabled={
+          busy || quotaUnavailable || quota?.remaining === 0 || Boolean(turnstileSiteKey && !token)
+        }
         type="submit"
       >
-        {busy ? "Membuat akun…" : "Buat Akun"}
+        {busy ? (
+          <>
+            <PathLoader size="sm" label="Membuat akun" /> Menghubungi server
+          </>
+        ) : (
+          "Buat akun"
+        )}
       </button>
       {turnstileSiteKey && !token && (
         <p className="muted">Selesaikan verifikasi keamanan di atas.</p>
@@ -261,7 +294,7 @@ function Connection({ data }: { data: Record<string, unknown> }) {
         if (key === "links" && value && typeof value === "object")
           return Object.entries(value).map(([label, url]) => (
             <div className="connection-row" key={`link-${label}`}>
-              <span>
+              <span className="technical-value">
                 {label}: {textValue(url)}
               </span>
               <CopyButton value={textValue(url)} />
@@ -270,7 +303,7 @@ function Connection({ data }: { data: Record<string, unknown> }) {
         const shown = textValue(value);
         return shown ? (
           <div className="connection-row" key={key}>
-            <span>
+            <span className="technical-value">
               <strong>{key.replaceAll("_", " ")}:</strong> {shown}
             </span>
             <CopyButton value={shown} />
