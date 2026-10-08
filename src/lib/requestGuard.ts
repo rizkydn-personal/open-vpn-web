@@ -1,54 +1,47 @@
+import "server-only";
 
+export type GuardFailure = {
+  status: 403 | 413 | 415;
+  code: "forbidden_origin" | "payload_too_large" | "unsupported_media_type";
+};
+const MAX_BODY_BYTES = 2048;
 
-export async function checkRequestGuard(request: Request, bodyText?: string): Promise<{ ok: true } | { ok: false; status: number; code: string; message: string }> {
-  // 1. Check Content-Type
-  const contentType = request.headers.get("content-type") || "";
-  if (!contentType.includes("application/json")) {
-    return { ok: false, status: 415, code: "unsupported_media_type", message: "Content-Type must be application/json" };
-  }
-
-  // 2. Check Origin / Sec-Fetch-Site
-  const secFetchSite = request.headers.get("sec-fetch-site");
+export function guardAccountRequest(request: Request): GuardFailure | null {
+  const contentType = request.headers.get("content-type")?.split(";", 1)[0]?.trim().toLowerCase();
+  if (contentType !== "application/json") return { status: 415, code: "unsupported_media_type" };
+  const contentLength = Number(request.headers.get("content-length") ?? "0");
+  if (Number.isFinite(contentLength) && contentLength > MAX_BODY_BYTES)
+    return { status: 413, code: "payload_too_large" };
+  const fetchSite = request.headers.get("sec-fetch-site");
+  if (fetchSite && fetchSite !== "same-origin") return { status: 403, code: "forbidden_origin" };
   const origin = request.headers.get("origin");
-  const host = request.headers.get("host") || "";
-
-  if (secFetchSite) {
-    if (secFetchSite !== "same-origin") {
-      return { ok: false, status: 403, code: "forbidden_origin", message: "Cross-origin requests are not allowed" };
-    }
-  } else if (origin) {
+  if (origin) {
+    let matches = false;
     try {
-      const originUrl = new URL(origin);
-      // We check if the host in origin matches the host header
-      // This is a naive check. A better check is verifying if the host matches.
-      // But we just compare host strings.
-      if (originUrl.host !== host) {
-         return { ok: false, status: 403, code: "forbidden_origin", message: "Cross-origin requests are not allowed" };
-      }
+      const source = new URL(origin);
+      const target = new URL(request.url);
+      const host = request.headers.get("host");
+      const forwardedProtocol = request.headers.get("x-forwarded-proto")?.split(",")[0]?.trim();
+      const sameHost = Boolean(host && source.host === host);
+      const sameProtocol =
+        source.protocol === target.protocol ||
+        (sameHost && Boolean(forwardedProtocol) && source.protocol === `${forwardedProtocol}:`);
+      matches = source.origin === target.origin || (sameHost && sameProtocol);
     } catch {
-      return { ok: false, status: 403, code: "forbidden_origin", message: "Invalid origin" };
+      matches = false;
     }
-  } else {
-    // Both missing. Allow if not production, otherwise reject.
-    if (process.env.NODE_ENV === "production") {
-      // In production, we require browser headers or explicit non-browser bypass.
-      // For this app, only browsers should hit this endpoint (has turnstile).
-      return { ok: false, status: 403, code: "forbidden_origin", message: "Missing origin headers in production" };
-    }
+    if (!matches) return { status: 403, code: "forbidden_origin" };
   }
+  if (
+    !fetchSite &&
+    !origin &&
+    process.env.NODE_ENV === "production" &&
+    request.headers.get("user-agent")?.includes("Mozilla")
+  )
+    return { status: 403, code: "forbidden_origin" };
+  return null;
+}
 
-  // 3. Check Content-Length and actual size
-  const contentLengthStr = request.headers.get("content-length");
-  if (contentLengthStr) {
-    const len = parseInt(contentLengthStr, 10);
-    if (len > 2048) {
-      return { ok: false, status: 413, code: "payload_too_large", message: "Payload too large" };
-    }
-  }
-  
-  if (bodyText !== undefined && bodyText.length > 2048) {
-    return { ok: false, status: 413, code: "payload_too_large", message: "Payload too large" };
-  }
-
-  return { ok: true };
+export function isPayloadTooLarge(text: string): boolean {
+  return new TextEncoder().encode(text).length > MAX_BODY_BYTES;
 }

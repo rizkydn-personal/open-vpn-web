@@ -1,6 +1,6 @@
 # Open VPN Web
 
-Portal publik untuk membuat akun VPN lewat API server. Aplikasi ini hanya memanggil `GET /v1/services`, `GET /v1/status`, dan `POST /v1/accounts`. API key hanya dipakai oleh server web. Hasil koneksi tampil sekali di browser dan tidak disimpan di database, local storage, atau log.
+Portal publik untuk membuat akun VPN lewat API server. Aplikasi ini hanya memanggil `GET /v1/services`, `GET /v1/status`, dan `POST /v1/accounts`. API key hanya dipakai oleh server web. Kredensial hasil tidak disimpan oleh aplikasi web di database atau log. Tab browser menyimpan salinan sementara di `sessionStorage` paling lama 30 menit atau sampai hasil ditutup.
 
 ## Menjalankan mock lokal
 
@@ -26,27 +26,41 @@ Jalankan sebagai proses Node.js biasa dengan systemd atau PM2. Isi konfigurasi A
 
 ### Variabel konfigurasi
 
-| Variabel | Default | Fungsi |
-|---|---:|---|
-| `VPN_API_BASE_URL` | `http://127.0.0.1:8089` | Basis URL API VPN utama |
-| `VPN_API_SERVERS` | kosong | JSON array server API untuk failover, misalnya `[{"id":"vm1","baseUrl":"https://api.example.com","apiKey":"..."}]` |
-| `VPN_API_KEY` | wajib | Kunci untuk API, hanya di server |
-| `DAILY_LIMIT_PER_SERVICE` | `10` | Kuota global per layanan per hari |
-| `ALLOWED_DAYS` | `1,3,7` | Durasi yang dapat dipilih |
-| `APP_TIMEZONE` | `Asia/Jakarta` | Zona waktu reset (fitur selalu WIB) |
-| `PER_IP_CREATE_LIMIT_PER_HOUR` | `5` | Batas percobaan per IP ter-hash per jam |
-| `IP_HASH_SALT` | wajib | Salt acak untuk menyamarkan IP sebelum disimpan |
-| `TRUST_PROXY_HEADERS` | `0` | Percayai X-Forwarded-For hanya di belakang proxy tepercaya |
-| `SUPPORT_URL` | kosong | Kartu dukungan opsional |
-| `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` | kosong | Aktifkan verifikasi Turnstile bila keduanya diisi |
-| `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY` | kosong | Aktifkan Firestore server-side; private key memakai `\\n` untuk baris baru |
+| Variabel                                                               |                 Default | Fungsi                                                                                    |
+| ---------------------------------------------------------------------- | ----------------------: | ----------------------------------------------------------------------------------------- |
+| `VPN_API_BASE_URL`                                                     | `http://127.0.0.1:8089` | Basis URL API VPN utama                                                                   |
+| `VPN_API_SERVERS`                                                      |                  kosong | JSON array server; tiap server dapat memiliki `label`, `location`, dan `dailyLimit` sendiri |
+| `VPN_API_KEY`                                                          |                   wajib | Kunci untuk API, hanya di server                                                          |
+| `DAILY_LIMIT_PER_SERVICE`                                              |                    `10` | Kuota global per layanan per hari                                                         |
+| `ALLOWED_DAYS`                                                         |                 `1,3,7` | Durasi yang dapat dipilih                                                                 |
+| `PER_IP_CREATE_LIMIT_PER_HOUR`                                         |                     `5` | Batas percobaan per IP ter-hash per jam                                                   |
+| `PER_IP_CREATE_LIMIT_PER_DAY`                                          |                     `3` | Batas per IP, per layanan, per hari WIB                                                   |
+| `QUOTA_STORE`                                                          |                otomatis | `firestore` bila kredensial lengkap, selain itu `memory`                                  |
+| `SITE_URL`                                                             |                  kosong | URL publik untuk metadata dasar                                                           |
+| `VPN_API_GET_TIMEOUT_MS`                                               |                  `4000` | Batas waktu permintaan baca upstream                                                      |
+| `VPN_API_POST_TIMEOUT_MS`                                              |                 `20000` | Batas waktu pembuatan akun upstream                                                       |
+| `IP_HASH_SALT`                                                         |                   wajib | Salt acak untuk menyamarkan IP sebelum disimpan                                           |
+| `TRUST_PROXY_HEADERS`                                                  |                     `0` | Percayai X-Forwarded-For hanya di belakang proxy tepercaya                                |
+| `SUPPORT_URL`                                                          |                  kosong | Kartu dukungan opsional                                                                   |
+| `FORCE_MAINTENANCE`                                                    |                     `0` | Nilai `1` menampilkan halaman maintenance statis dengan HTTP 503                          |
+| `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`                           |                  kosong | Aktifkan verifikasi Turnstile bila keduanya diisi                                         |
+| `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY` |                  kosong | Aktifkan Firestore server-side; private key memakai `\\n` untuk baris baru                |
 
-Kuota Firestore berlaku global untuk seluruh pengunjung dan tiap layanan memiliki hitungan sendiri. Hitungan direset pada 00.00 WIB. Satu pengunjung dapat menghabiskan kuota global. Rate limit per IP dan Turnstile opsional mengurangi penyalahgunaan. Karena kredensial tidak disimpan, pengguna harus menyalin atau mengunduhnya sebelum meninggalkan halaman.
+Tanpa kredensial `FIREBASE_*`, kuota memakai store in-memory per proses; data hilang saat restart dan tidak dibagi antarproses. Mode ini sesuai untuk lokal saja. Untuk produksi lintas proses, konfigurasikan Firestore (`QUOTA_STORE=firestore`). Kuota Firestore berlaku global untuk seluruh pengunjung dan tiap layanan memiliki hitungan sendiri. Hitungan direset pada 00.00 WIB. Satu pengunjung dapat menghabiskan kuota global. Rate limit per IP dan Turnstile opsional mengurangi penyalahgunaan. Karena kredensial tidak disimpan, pengguna harus menyalin atau mengunduhnya sebelum meninggalkan halaman.
+
+## Fitur
+
+- Katalog layanan dan status server dari API upstream.
+- Kuota global harian serta pembatasan per IP.
+- Verifikasi Turnstile opsional dan penyimpanan sementara hasil di tab browser.
+- Halaman ketentuan, privasi, dan antarmuka responsif berbahasa Indonesia.
 
 ## Perintah pemeriksaan
 
 ```sh
+npm run format:check
 npm run lint
+npm run typecheck
 npm test
 npm run test:integration
 npm run test:e2e

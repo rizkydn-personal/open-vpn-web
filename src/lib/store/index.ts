@@ -10,7 +10,7 @@ let warned = false;
 export function getStore(): QuotaStore {
   const env = getEnv();
   const envPref = env.QUOTA_STORE;
-  
+
   let useMem = false;
   if (envPref === "memory") {
     useMem = true;
@@ -51,4 +51,3 @@ export function reserveIpQuota(ipHash: string, service: string, now: Date, limit
 }
 
 export type { QuotaStore } from "./types";
-
