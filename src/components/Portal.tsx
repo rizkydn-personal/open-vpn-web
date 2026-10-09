@@ -114,7 +114,16 @@ export function Portal({
             <p className="eyebrow">Layanan VPN</p>
             <h1 id="service-title">{selected?.service_label ?? selected?.label ?? serviceId}</h1>
             {selected?.server_label ? (
-              <p className="service-server-label">Server: {selected.server_label}</p>
+              <p className="service-server-label">
+                Server:{" "}
+                {selected.server_id ? (
+                  <Link href={`/server/${encodeURIComponent(selected.server_id)}`}>
+                    {selected.server_label}
+                  </Link>
+                ) : (
+                  selected.server_label
+                )}
+              </p>
             ) : null}
             <p>
               {selected?.available

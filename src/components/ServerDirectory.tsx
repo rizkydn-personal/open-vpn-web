@@ -5,18 +5,25 @@ import { ServerStatusBadge } from "@/components/ServerStatusBadge";
 import { groupServicesByServer, serverAccountTotal, serverHealth } from "@/lib/serverDirectory";
 
 const protocolDetails: Record<string, string> = {
-  ssh: "Koneksi tunnel melalui SSH. Host, port, dan detail autentikasi mengikuti data dari server.",
+  ssh: "Hasilnya host, port, username, dan kata sandi untuk dimasukkan ke aplikasi tunnel SSH.",
   vmess:
-    "Protokol VMess pada layanan Xray. Gunakan tautan atau konfigurasi yang ditampilkan setelah akun dibuat.",
+    "Protokol Xray. Hasilnya tautan koneksi (biasanya diawali vmess://) untuk diimpor ke aplikasi klien yang mendukung VMess.",
   vless:
-    "Protokol VLESS pada layanan Xray. Gunakan tautan atau konfigurasi yang ditampilkan setelah akun dibuat.",
+    "Protokol Xray. Hasilnya tautan koneksi (biasanya diawali vless://) untuk diimpor ke aplikasi klien yang mendukung VLESS.",
   trojan:
-    "Protokol Trojan pada layanan Xray. Gunakan tautan atau konfigurasi yang ditampilkan setelah akun dibuat.",
+    "Protokol Xray. Hasilnya tautan koneksi (biasanya diawali trojan://) untuk diimpor ke aplikasi klien yang mendukung Trojan.",
   "ovpn-tcp":
-    "OpenVPN dengan transport TCP. Jika server memberikan berkas konfigurasi, unduh untuk diimpor ke aplikasi yang mendukung OpenVPN.",
+    "OpenVPN lewat TCP. Bila server menyediakan berkas .ovpn, unduh lalu impor ke aplikasi OpenVPN.",
   "ovpn-udp":
-    "OpenVPN dengan transport UDP. Jika server memberikan berkas konfigurasi, unduh untuk diimpor ke aplikasi yang mendukung OpenVPN.",
+    "OpenVPN lewat UDP. Bila server menyediakan berkas .ovpn, unduh lalu impor ke aplikasi OpenVPN.",
 };
+
+function listDays(days: number[]): string {
+  if (days.length === 0) return "beberapa hari";
+  if (days.length === 1) return `${days[0]} hari`;
+  const head = days.slice(0, -1).join(", ");
+  return `${head}${days.length > 2 ? "," : ""} atau ${days[days.length - 1]} hari`;
+}
 
 export function ServerDirectory({ meta }: { meta: Meta }) {
   const servers = groupServicesByServer(meta.services);
@@ -34,10 +41,12 @@ export function ServerDirectory({ meta }: { meta: Meta }) {
     <section className="server-directory" aria-labelledby="server-directory-title">
       <header className="server-directory__hero">
         <p className="eyebrow">Portal akun VPN</p>
-        <h1 id="server-directory-title">Koneksi VPN Anda dimulai dengan memilih server.</h1>
+        <h1 id="server-directory-title">
+          Buat akun VPN gratis untuk {listDays(meta.allowed_days)}.
+        </h1>
         <p className="server-directory__intro">
-          Pilih lokasi server dan protokol yang tersedia, tentukan masa aktif akun, lalu simpan
-          detail koneksi setelah akun dibuat.
+          Pilih server dan protokol, buat akunnya, lalu salin detail koneksi. Detail disimpan di tab
+          ini selama paling lama 30 menit.
         </p>
       </header>
       {meta.unavailable ? (
@@ -49,12 +58,8 @@ export function ServerDirectory({ meta }: { meta: Meta }) {
         </p>
       ) : null}
       <div className="server-directory__selection">
-        <p className="eyebrow">Pilih server</p>
-        <h2 id="server-selection-title">Server yang tersedia</h2>
-        <p>
-          Bandingkan lokasi, status, kapasitas, dan protokol. Pilih server untuk melihat status
-          layanan serta kuota yang berlaku.
-        </p>
+        <h2 id="server-selection-title">Pilih server</h2>
+        <p>Buka satu server untuk melihat status tiap protokol dan sisa kuota hari ini.</p>
       </div>
       {servers.length ? (
         <ul className="server-card-list">
@@ -142,35 +147,29 @@ export function ServerDirectory({ meta }: { meta: Meta }) {
 
       <section className="portal-guide" aria-labelledby="portal-guide-title">
         <header className="portal-guide__heading">
-          <p className="eyebrow">Panduan portal</p>
-          <h2 id="portal-guide-title">Pilih server, lalu siapkan detail koneksi.</h2>
-          <p>
-            Tiap server dapat menyediakan protokol dan kuota yang berbeda. Buka server untuk
-            membandingkan layanan aktif, jumlah akun, dan sisa kuota sebelum membuat akun.
-          </p>
+          <h2 id="portal-guide-title">Cara kerja</h2>
         </header>
 
         <ol className="portal-guide__steps">
           <li>
-            <h3>Pilih server</h3>
+            <h3>Bandingkan server</h3>
             <p>
-              Lokasi adalah lokasi yang dikonfigurasi untuk server. Online berarti API server
-              menjawab permintaan status terakhir dari portal, dan uptime menunjukkan lama proses
-              server berjalan.
+              Kartu server menunjukkan lokasi, status, dan protokol. Online berarti server menjawab
+              pengecekan status terakhir. Uptime adalah lama server menyala.
             </p>
           </li>
           <li>
-            <h3>Pilih layanan dan durasi</h3>
+            <h3>Pilih protokol dan durasi</h3>
             <p>
-              Di halaman server, periksa status protokol, jumlah akun, dan kuota hari ini. Pilih
-              salah satu durasi yang tersedia pada formulir layanan.
+              Di halaman server, lihat status tiap protokol, jumlah akun, dan sisa kuota hari ini.
+              Lalu pilih durasi akun.
             </p>
           </li>
           <li>
             <h3>Buat dan simpan akun</h3>
             <p>
-              Username dibuat otomatis. Setelah akun berhasil, salin detail atau unduh berkas
-              konfigurasi bila server menyediakannya.
+              Username dan kata sandi dibuat otomatis. Setelah akun jadi, salin detailnya atau unduh
+              berkas konfigurasi bila tersedia.
             </p>
           </li>
         </ol>
@@ -179,8 +178,8 @@ export function ServerDirectory({ meta }: { meta: Meta }) {
           <section className="protocol-guide" aria-labelledby="protocol-guide-title">
             <h2 id="protocol-guide-title">Mengenal protokol</h2>
             <p>
-              Daftar ini mengikuti layanan yang dikirim API. Format konfigurasi dan aplikasi yang
-              cocok dapat berbeda; gunakan detail koneksi yang diberikan server.
+              Tiap protokol memberi detail koneksi yang berbeda. Pakai persis yang tampil setelah
+              akun dibuat.
             </p>
             <ul className="protocol-guide__list">
               {protocols.map((service) => {
@@ -190,7 +189,7 @@ export function ServerDirectory({ meta }: { meta: Meta }) {
                     <h3>{service.service_label ?? service.label}</h3>
                     <p>
                       {protocolDetails[key] ??
-                        "Lihat detail koneksi dari server setelah akun dibuat untuk mengetahui format layanan ini."}
+                        "Detail koneksi untuk protokol ini tampil setelah akun dibuat."}
                     </p>
                   </li>
                 );
@@ -202,9 +201,9 @@ export function ServerDirectory({ meta }: { meta: Meta }) {
         <aside className="portal-guide__note">
           <h2>Kuota dan penyimpanan detail</h2>
           <p>
-            Kuota dihitung per layanan dan direset setiap pukul 00.00 WIB. Detail akun tampil di tab
-            ini dan disimpan sementara di session storage. Jika halaman dimuat ulang, detail hanya
-            dipulihkan selama belum lewat 30 menit. Salin atau unduh setelah akun dibuat.
+            Kuota dihitung per layanan dan kembali penuh setiap pukul 00.00 WIB. Detail akun
+            disimpan sementara di tab ini (session storage) selama paling lama 30 menit, jadi salin
+            atau unduh segera setelah akun dibuat.
           </p>
         </aside>
       </section>
