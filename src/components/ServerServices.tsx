@@ -2,7 +2,8 @@ import Link from "next/link";
 import { ArrowLeft, Clock3 } from "lucide-react";
 import type { Meta } from "@/components/Portal";
 import { ServiceIcon } from "@/components/ServiceIcon";
-import { groupServicesByServer } from "@/lib/serverDirectory";
+import { ServerStatusBadge } from "@/components/ServerStatusBadge";
+import { groupServicesByServer, serverHealth } from "@/lib/serverDirectory";
 
 export function ServerServices({ meta, serverId }: { meta: Meta; serverId: string }) {
   const server = groupServicesByServer(meta.services).find((item) => item.id === serverId);
@@ -35,14 +36,15 @@ export function ServerServices({ meta, serverId }: { meta: Meta; serverId: strin
       <header className="server-page__heading">
         <p className="eyebrow">Pilih protokol</p>
         <h1 id="server-title">{server.label}</h1>
-        <p className="server-location">Location: {location ?? "Belum diatur"}</p>
-        <p>
+        <p className="server-location">Lokasi: {location ?? "Belum diatur"}</p>
+        <ServerStatusBadge
+          health={serverHealth(meta.status?.servers, server.id, meta.statusUnavailable)}
+          available={server.services.filter((service) => service.available).length}
+        />
+        <p className="server-uptime">
           {typeof status?.uptime_seconds === "number"
             ? `Uptime ${Math.floor(status.uptime_seconds / 3600)} jam`
             : "Uptime belum tersedia"}
-          {typeof status?.ping_ms === "number"
-            ? ` · Ping ${status.ping_ms} ms`
-            : " · Ping belum tersedia"}
         </p>
         <p className="server-page__description">
           Pilih protokol yang ingin digunakan. Setiap baris menunjukkan status layanan, jumlah akun

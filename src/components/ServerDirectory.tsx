@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { ArrowRight, Server as ServerIcon } from "lucide-react";
+import { ArrowRight, Gauge, Server as ServerIcon, Users } from "lucide-react";
 import type { Meta } from "@/components/Portal";
-import { groupServicesByServer } from "@/lib/serverDirectory";
+import { ServerStatusBadge } from "@/components/ServerStatusBadge";
+import { groupServicesByServer, serverAccountTotal, serverHealth } from "@/lib/serverDirectory";
 
 const protocolDetails: Record<string, string> = {
   ssh: "Koneksi tunnel melalui SSH. Host, port, dan detail autentikasi mengikuti data dari server.",
@@ -51,8 +52,8 @@ export function ServerDirectory({ meta }: { meta: Meta }) {
         <p className="eyebrow">Pilih server</p>
         <h2 id="server-selection-title">Server yang tersedia</h2>
         <p>
-          Bandingkan lokasi, uptime, dan waktu respons. Pilih server untuk melihat protokol, status
-          layanan, serta kuota yang berlaku.
+          Bandingkan lokasi, status, kapasitas, dan protokol. Pilih server untuk melihat status
+          layanan serta kuota yang berlaku.
         </p>
       </div>
       {servers.length ? (
@@ -64,30 +65,70 @@ export function ServerDirectory({ meta }: { meta: Meta }) {
             const location =
               server.location ??
               (typeof status?.location === "string" ? status.location : undefined);
+            const health = serverHealth(meta.status?.servers, server.id, meta.statusUnavailable);
+            const accounts = serverAccountTotal(server, meta.status?.accounts);
             return (
               <li key={server.id}>
                 <Link className="server-card" href={`/server/${encodeURIComponent(server.id)}`}>
-                  <span className="server-card__icon">
-                    <ServerIcon aria-hidden="true" />
+                  <span className="server-card__head">
+                    <span className="server-card__icon">
+                      <ServerIcon aria-hidden="true" />
+                    </span>
+                    <span className="server-card__title">
+                      <strong>{server.label}</strong>
+                      <span>{location ?? "Lokasi belum diatur"}</span>
+                    </span>
+                    <ArrowRight className="server-card__arrow" aria-hidden="true" />
                   </span>
-                  <span className="server-card__main">
-                    <strong>{server.label}</strong>
-                    <span>Location: {location ?? "Belum diatur"}</span>
-                    <span>
-                      {server.services.length} layanan · {available} tersedia
-                    </span>
-                    <span>
-                      {typeof uptime === "number"
-                        ? `Uptime ${Math.floor(uptime / 3600)} jam`
-                        : "Uptime belum tersedia"}
-                    </span>
-                    <span>
-                      {typeof status?.ping_ms === "number"
-                        ? `Ping ${status.ping_ms} ms`
-                        : "Ping belum tersedia"}
+                  <ServerStatusBadge health={health} available={available} />
+                  <span className="server-card__block">
+                    <span className="server-card__label">Protokol</span>
+                    <span className="chip-list">
+                      {server.services.map((service) => (
+                        <span
+                          className={service.available ? "chip" : "chip chip--off"}
+                          key={service.id}
+                        >
+                          {service.service_label ?? service.label}
+                          {service.available ? null : (
+                            <span className="sr-only"> (tidak tersedia)</span>
+                          )}
+                        </span>
+                      ))}
                     </span>
                   </span>
-                  <ArrowRight className="server-card__arrow" aria-hidden="true" />
+                  <span className="server-card__stats">
+                    <span className="stat-tile">
+                      <span className="server-card__label">
+                        {server.capacity ? "Kapasitas" : "Akun tercatat"}
+                      </span>
+                      <strong>
+                        <Users size={18} aria-hidden="true" />
+                        {accounts === null
+                          ? "Belum ada data"
+                          : server.capacity
+                            ? `${accounts} / ${server.capacity}`
+                            : accounts}
+                      </strong>
+                    </span>
+                    {server.bandwidth ? (
+                      <span className="stat-tile">
+                        <span className="server-card__label">Bandwidth</span>
+                        <strong>
+                          <Gauge size={18} aria-hidden="true" />
+                          {server.bandwidth}
+                        </strong>
+                      </span>
+                    ) : null}
+                    <span className="stat-tile">
+                      <span className="server-card__label">Uptime</span>
+                      <strong>
+                        {typeof uptime === "number"
+                          ? `${Math.floor(uptime / 3600)} jam`
+                          : "Belum ada data"}
+                      </strong>
+                    </span>
+                  </span>
                 </Link>
               </li>
             );
@@ -113,8 +154,9 @@ export function ServerDirectory({ meta }: { meta: Meta }) {
           <li>
             <h3>Pilih server</h3>
             <p>
-              Location menunjukkan lokasi yang dikonfigurasi untuk server. Uptime menunjukkan lama
-              proses server berjalan, sedangkan ping adalah waktu respons API status dari portal.
+              Lokasi adalah lokasi yang dikonfigurasi untuk server. Online berarti API server
+              menjawab permintaan status terakhir dari portal, dan uptime menunjukkan lama proses
+              server berjalan.
             </p>
           </li>
           <li>

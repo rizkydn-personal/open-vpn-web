@@ -56,6 +56,8 @@ export type ApiServer = {
   label?: string;
   location?: string;
   dailyLimit?: number;
+  capacity?: number;
+  bandwidth?: string;
 };
 let cachedEnv: AppEnv | undefined;
 let warnedSupport = false;
@@ -85,6 +87,9 @@ export function getApiServers(env: AppEnv = getEnv()): ApiServer[] {
       const dailyLimit = value.dailyLimit;
       if (dailyLimit !== undefined && (!Number.isInteger(dailyLimit) || Number(dailyLimit) < 1))
         throw new Error(`dailyLimit server ${index + 1} tidak valid`);
+      const capacity = value.capacity;
+      if (capacity !== undefined && (!Number.isInteger(capacity) || Number(capacity) < 1))
+        throw new Error(`capacity server ${index + 1} tidak valid`);
       return {
         id,
         baseUrl,
@@ -95,6 +100,11 @@ export function getApiServers(env: AppEnv = getEnv()): ApiServer[] {
             ? value.location.trim().slice(0, 80)
             : undefined,
         dailyLimit: dailyLimit === undefined ? undefined : Number(dailyLimit),
+        capacity: capacity === undefined ? undefined : Number(capacity),
+        bandwidth:
+          typeof value.bandwidth === "string" && value.bandwidth.trim()
+            ? value.bandwidth.trim().slice(0, 40)
+            : undefined,
       };
     });
     if (!servers.length) throw new Error("tidak ada server");
