@@ -1,5 +1,5 @@
 import "server-only";
-import { getEnv } from "@/lib/env";
+import { durationLimits, getEnv } from "@/lib/env";
 import { getServices, getStatus } from "@/lib/vpnApi";
 import { getSiteSettings, quotaSnapshot } from "@/lib/firestore";
 import type { Meta } from "@/components/Portal";
@@ -9,16 +9,18 @@ export async function initialMeta(): Promise<Meta> {
   const [s, t, site] = await Promise.allSettled([getServices(), getStatus(), getSiteSettings()]);
   const services = s.status === "fulfilled" ? s.value.value : [];
   const status = t.status === "fulfilled" ? t.value.value : null;
-  let quota = {};
+  let quota: Meta["quota"] = {};
   let quotaUnavailable = false;
   try {
-    quota = await quotaSnapshot(
+    // Shape runtime: per layanan berisi entri per durasi ("1","3","7") + field
+    // agregat lama (used/limit/remaining/resetsAt, deprecated) + "resetsAt" atas.
+    quota = (await quotaSnapshot(
       services,
       new Date(),
       Object.fromEntries(
-        services.map((service) => [service.id, service.daily_limit ?? env.DAILY_LIMIT_PER_SERVICE]),
+        services.map((service) => [service.id, durationLimits(env, service.daily_limit)]),
       ),
-    );
+    )) as unknown as Meta["quota"];
   } catch {
     quotaUnavailable = true;
   }

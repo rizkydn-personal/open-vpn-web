@@ -774,49 +774,6 @@ progress::-moz-progress-bar {
   margin-bottom: 0.6rem;
   font-weight: 700;
 }
-.duration-options {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(5rem, 1fr));
-  gap: 0.55rem;
-}
-.duration-option {
-  position: relative;
-  min-width: 0;
-  min-height: 3rem;
-  display: grid;
-  place-items: center;
-  border: 1px solid var(--line);
-  border-radius: 0.55rem;
-  background: var(--surface);
-  font-weight: 650;
-  cursor: pointer;
-  transition:
-    border-color 0.15s ease,
-    background-color 0.15s ease;
-}
-.duration-option:hover {
-  border-color: var(--primary);
-}
-.duration-option.selected {
-  border-color: var(--primary);
-  background: var(--sky-tint);
-  box-shadow: inset 0 0 0 1px var(--primary);
-  color: var(--primary);
-  font-weight: 750;
-}
-.duration-option input {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  opacity: 0;
-  cursor: pointer;
-}
-.duration-option:focus-within {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
-}
 .button-primary,
 .button-secondary,
 .copy-button {
@@ -824,6 +781,7 @@ progress::-moz-progress-bar {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex: none;
   gap: 0.4rem;
   border: 0;
   border-radius: 0.55rem;
@@ -842,7 +800,7 @@ progress::-moz-progress-bar {
     color 0.15s ease;
 }
 .button-primary {
-  width: 100%;
+  width: auto;
   background: var(--primary);
   color: white;
 }
@@ -878,24 +836,6 @@ progress::-moz-progress-bar {
 .result-card {
   margin-top: 1rem;
 }
-.connection {
-  margin-block: 1rem;
-}
-.connection h3 {
-  margin-bottom: 0.4rem;
-}
-.connection-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  border-top: 1px solid var(--line);
-  padding: 0.55rem 0;
-  overflow-wrap: anywhere;
-}
-.connection-row > span {
-  min-width: 0;
-}
 .technical-value {
   overflow-wrap: anywhere;
   font-family: ui-monospace, "Cascadia Code", "Segoe UI Mono", monospace;
@@ -922,51 +862,7 @@ progress::-moz-progress-bar {
   color: var(--primary);
   text-decoration: underline;
 }
-.portal-intro {
-  max-width: 50rem;
-  margin-bottom: clamp(2rem, 5vw, 3.5rem);
-}
-.portal-intro h1 {
-  max-width: 18ch;
-  margin: 0.65rem 0 0.8rem;
-  font-size: clamp(2.2rem, 5.2vw, 4rem);
-  font-weight: 740;
-  letter-spacing: -0.045em;
-  line-height: 1.08;
-}
-.portal-intro > p:last-child {
-  max-width: 55ch;
-  margin: 0;
-  color: var(--muted);
-  font-size: 1.05rem;
-}
-.service-list-section,
-.status-section,
-.quota-strip {
-  margin-top: clamp(2rem, 5vw, 3.5rem);
-}
-.service-list-section > h2,
-.section-heading h2,
-.quota-strip > h2 {
-  margin: 0 0 0.75rem;
-  font-size: 1.3rem;
-}
-.service-list {
-  margin: 0;
-  padding: 0;
-  border-top: 1px solid var(--line);
-  list-style: none;
-}
-.service-list__row {
-  display: grid;
-  grid-template-columns: 2.75rem minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 0.75rem;
-  min-height: 5.25rem;
-  border-bottom: 1px solid var(--line);
-  padding: 0.85rem 0.25rem;
-}
-.service-list__icon {
+.support-card {
   width: 2.5rem;
   height: 2.5rem;
   display: grid;
@@ -1011,119 +907,6 @@ progress::-moz-progress-bar {
   background: var(--surface);
   color: var(--ink);
 }
-.section-heading {
-  display: flex;
-  align-items: end;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 0.75rem;
-}
-.section-heading h2 {
-  margin-bottom: 0;
-}
-.section-heading .eyebrow {
-  margin: 0 0 0.25rem;
-}
-.status-metrics {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem 2.5rem;
-  margin: 0 0 1rem;
-  padding: 0.85rem 0;
-  border-block: 1px solid var(--line);
-}
-.server-status-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
-  gap: 0.5rem 1rem;
-  margin: 0 0 1rem;
-  padding: 0;
-  list-style: none;
-}
-.server-status-list li {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.2rem 0.7rem;
-  border-left: 2px solid var(--primary);
-  padding: 0.35rem 0.65rem;
-}
-.server-status-list li strong {
-  flex-basis: 100%;
-}
-.server-status-list li span {
-  color: var(--muted);
-  font-size: 0.82rem;
-}
-.status-metrics > div {
-  display: flex;
-  gap: 0.5rem;
-}
-.status-metrics dt {
-  color: var(--muted);
-}
-.status-metrics dd {
-  margin: 0;
-  font-weight: 700;
-}
-.status-table-wrap {
-  overflow-x: auto;
-}
-.status-table {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: left;
-}
-.status-table caption {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-}
-.status-table th,
-.status-table td {
-  border-bottom: 1px solid var(--line);
-  padding: 0.65rem 0.5rem;
-}
-.status-table thead th {
-  color: var(--muted);
-  font-size: 0.8rem;
-  font-weight: 650;
-}
-.status-table tbody th {
-  font-weight: 650;
-}
-.status-table td {
-  color: var(--muted);
-}
-.quota-strip {
-  border-top: 2px solid var(--primary);
-  padding-top: 0.8rem;
-}
-.quota-strip > h2 {
-  margin-bottom: 0.45rem;
-}
-.quota-strip ul {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.quota-strip li {
-  display: grid;
-  grid-template-columns: minmax(5rem, 1fr) auto minmax(12rem, 1.2fr);
-  align-items: center;
-  gap: 0.75rem;
-  border-bottom: 1px solid var(--line);
-  padding: 0.55rem 0;
-}
-.quota-strip li strong {
-  color: var(--primary);
-}
-.quota-strip li small {
-  color: var(--muted);
-  text-align: right;
-}
 .recovery-page {
   width: min(100%, 42rem);
   margin-inline: auto;
@@ -1142,10 +925,6 @@ progress::-moz-progress-bar {
 }
 .recovery-code {
   font-family: ui-monospace, "Cascadia Code", "Segoe UI Mono", monospace;
-}
-.recovery-page .button-primary {
-  width: auto;
-  min-height: 44px;
 }
 .not-found-page {
   border: 0;
@@ -1303,6 +1082,189 @@ progress::-moz-progress-bar {
   text-underline-offset: 0.2em;
 }
 
+/* Duration cards: satu kartu per pilihan durasi, masing-masing dengan kuota sendiri. */
+.duration-cards {
+  margin: 0 0 1.25rem;
+  padding: 0;
+  border: 0;
+}
+.duration-cards legend {
+  margin-bottom: 0.6rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+.duration-cards__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+.duration-card {
+  position: relative;
+  display: grid;
+  gap: 0.3rem;
+  align-content: start;
+  border: 1px solid var(--line);
+  border-radius: 0.7rem;
+  background: var(--surface);
+  padding: 0.9rem 1rem;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+.duration-card:hover {
+  border-color: var(--primary);
+}
+.duration-card--active {
+  border-color: var(--primary);
+  background: var(--sky-tint);
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+.duration-card--exhausted {
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+.duration-card input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.duration-card--exhausted input {
+  cursor: not-allowed;
+}
+.duration-card:focus-within {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+.duration-card__days {
+  color: var(--primary);
+  font-size: 1.25rem;
+  font-weight: 750;
+  line-height: 1.2;
+}
+.duration-card__quota {
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+.duration-card progress {
+  margin-top: 0.2rem;
+}
+
+/* Panel status pemuatan data. */
+.loading-panel {
+  display: grid;
+  gap: 0.75rem;
+  justify-items: start;
+  align-content: center;
+  min-height: 16rem;
+}
+.loading-panel p {
+  margin: 0;
+  color: var(--muted);
+}
+
+/* Kartu hasil akun: fakta akun + blok detail per protokol. */
+.result-once {
+  border-left: 3px solid var(--warm);
+  background: var(--warm-tint);
+  padding: 0.6rem 0.9rem;
+  font-size: 0.92rem;
+}
+.account-facts {
+  display: grid;
+  margin: 1rem 0;
+  border-top: 1px solid var(--line);
+}
+.account-facts > div {
+  display: grid;
+  grid-template-columns: minmax(8rem, 11rem) minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+  padding: 0.55rem 0;
+}
+.account-facts dt {
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+.account-facts dd {
+  margin: 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  overflow-wrap: anywhere;
+}
+.payload-block {
+  margin: 0 0 1rem;
+  border: 1px solid var(--line);
+  border-radius: 0.7rem;
+  background: var(--bg);
+  padding: 1rem 1.15rem;
+}
+.payload-block h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.05rem;
+}
+.payload-block dl {
+  margin: 0;
+}
+.account-field {
+  display: grid;
+  grid-template-columns: minmax(7rem, 10rem) minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: center;
+  border-top: 1px solid var(--line);
+  padding: 0.6rem 0;
+  overflow-wrap: anywhere;
+}
+.account-field:first-child {
+  border-top: 0;
+}
+.account-field dt {
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+.account-field dd {
+  margin: 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.account-field--link dd {
+  align-items: flex-start;
+}
+.payload-block .muted {
+  margin: 0.75rem 0 0;
+}
+.result-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1rem;
+}
+
+@media (max-width: 640px) {
+  .create-form .button-primary {
+    width: 100%;
+  }
+  .duration-cards__grid {
+    grid-template-columns: 1fr;
+  }
+  .account-facts > div,
+  .account-field {
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
+  }
+}
+
 @media (max-width: 1023px) {
   .site-header__inner {
     min-height: 4.5rem;
@@ -1329,13 +1291,16 @@ progress::-moz-progress-bar {
     border-top: 1px solid var(--line);
     padding-top: 1rem;
   }
-  .service-list__row {
-    grid-template-columns: 2.5rem minmax(0, 1fr);
+  .site-footer__inner {
+    width: min(100% - 2rem, 74rem);
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding-block: 1rem;
   }
-  .service-list__action {
-    grid-column: 2;
-    justify-self: start;
-  }
+}
+
+@media (max-width: 1150px) {
   .server-service-list > li {
     grid-template-columns: 2.5rem minmax(0, 1fr);
   }
@@ -1345,21 +1310,6 @@ progress::-moz-progress-bar {
   .server-service-list .service-list__action {
     grid-column: 2;
     justify-self: start;
-  }
-  .quota-strip li {
-    grid-template-columns: 1fr auto;
-    gap: 0.2rem 0.75rem;
-  }
-  .quota-strip li small {
-    grid-column: 1 / -1;
-    text-align: left;
-  }
-  .site-footer__inner {
-    width: min(100% - 2rem, 74rem);
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding-block: 1rem;
   }
 }
 

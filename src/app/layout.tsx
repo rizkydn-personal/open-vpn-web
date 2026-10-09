@@ -17,7 +17,13 @@ export const metadata: Metadata = {
 export const viewport: Viewport = { themeColor: "#035AA6" };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  const supportUrl = getEnv().SUPPORT_URL;
+  // Defensif saat build/prerender tanpa env lengkap: footer dukungan disembunyikan.
+  let supportUrl: string | undefined;
+  try {
+    supportUrl = getEnv().SUPPORT_URL || undefined;
+  } catch {
+    supportUrl = undefined;
+  }
   return (
     <html lang="id">
       <body>
@@ -31,7 +37,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <footer className="site-footer">
           <div className="site-footer__inner">
             <p>
-              © {new Date().getFullYear()} rnpproject. Gunakan layanan dengan bertanggung jawab.
+              © {new Date().getFullYear()} VPN Gratis · rnpproject. Gunakan layanan dengan
+              bertanggung jawab.
             </p>
             <nav aria-label="Tautan footer">
               <Link href="/ketentuan">Ketentuan</Link>

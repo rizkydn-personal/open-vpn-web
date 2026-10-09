@@ -24,14 +24,19 @@ test("desktop flow creates an account, copies credentials and downloads OpenVPN 
       frame: r.headers.get("x-frame-options"),
     };
   });
-  expect(headers.csp).toContain("nonce-");
+  // CSP memakai pola "Without Nonces" (Next 16): halaman statis prerender
+  // tidak bisa ditempeli nonce per-request, dan 'strict-dynamic' mematikan
+  // hidrasi. Kebijakan ini disengaja, lihat BACKEND_BUILD.md keputusan 8.
+  expect(headers.csp).toContain("script-src 'self' 'unsafe-inline'");
+  expect(headers.csp).not.toContain("strict-dynamic");
+  expect(headers.csp).not.toContain("nonce-");
   expect(headers.type).toBe("nosniff");
   expect(headers.frame).toBe("DENY");
   await expect(page.getByRole("link", { name: "Uji", exact: true })).toBeVisible();
   await page.getByRole("link", { name: "Uji", exact: true }).click();
   await expect(page.getByRole("link", { name: "Pilih VMess", exact: true })).toBeVisible();
   await page.getByRole("link", { name: "Pilih SSH", exact: true }).click();
-  await page.getByLabel("3 hari").check();
+  await page.getByRole("radio", { name: "3 hari", exact: true }).check();
   const createResponse = page.waitForResponse((response) =>
     response.url().endsWith("/api/accounts"),
   );

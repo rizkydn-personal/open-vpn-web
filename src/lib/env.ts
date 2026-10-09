@@ -14,12 +14,60 @@ const isSafeApiUrl = (value: string): boolean => {
   }
 };
 
+export type DurationDays = 1 | 3 | 7;
+
+/** Default kuota per durasi (hari: limit). Total 10 = DAILY_LIMIT_PER_SERVICE default.
+ *  Nilai sementara, butuh konfirmasi Rizky. */
+export const DEFAULT_QUOTA_PER_DURATION: Record<DurationDays, number> = { 1: 4, 3: 3, 7: 3 };
+
+/** Parse "1:4,3:3,7:3" menjadi {1:4, 3:3, 7:3}. Throw bila sintaks tidak valid. */
+export function parseQuotaPerDuration(raw: string): Record<number, number> {
+  const result: Record<number, number> = {};
+  const trimmed = raw.trim();
+  if (!trimmed) throw new Error("QUOTA_PER_DURATION kosong.");
+  for (const pair of trimmed.split(",")) {
+    const text = pair.trim();
+    const match = text.match(/^(\d+)\s*:\s*(\d+)$/);
+    if (!match) throw new Error(`QUOTA_PER_DURATION tidak valid pada "${text}".`);
+    const days = Number(match[1]);
+    const limit = Number(match[2]);
+    if (days < 1 || days > 30)
+      throw new Error(`Durasi "${days}" di QUOTA_PER_DURATION harus 1-30 hari.`);
+    if (limit < 1) throw new Error(`Limit durasi ${days} hari harus minimal 1.`);
+    if (result[days] !== undefined)
+      throw new Error(`Durasi ${days} hari duplikat di QUOTA_PER_DURATION.`);
+    result[days] = limit;
+  }
+  return result;
+}
+
+/** Limit per durasi untuk satu layanan. serviceDailyLimit (override per server)
+ *  membagi totalnya secara proporsional mengikuti distribusi QUOTA_PER_DURATION. */
+export function durationLimits(
+  env: { QUOTA_PER_DURATION?: Record<number, number>; DAILY_LIMIT_PER_SERVICE: number },
+  serviceDailyLimit?: number,
+): Record<number, number> {
+  const base = env.QUOTA_PER_DURATION ?? DEFAULT_QUOTA_PER_DURATION;
+  const entries = Object.entries(base);
+  const baseTotal = entries.reduce((sum, [, limit]) => sum + limit, 0) || 1;
+  const total = serviceDailyLimit ?? env.DAILY_LIMIT_PER_SERVICE;
+  const out: Record<number, number> = {};
+  for (const [daysText, baseLimit] of entries)
+    out[Number(daysText)] = Math.max(1, Math.round((total * baseLimit) / baseTotal));
+  return out;
+}
+
 const envSchema = z
   .object({
     VPN_API_BASE_URL: z.string().default(""),
     VPN_API_KEY: z.string().trim().default(""),
     VPN_API_SERVERS: z.string().default(""),
     DAILY_LIMIT_PER_SERVICE: z.coerce.number().int().min(1).default(10),
+    QUOTA_PER_DURATION: z
+      .string()
+      .default("1:4,3:3,7:3")
+      .transform((value) => parseQuotaPerDuration(value))
+      .pipe(z.record(z.coerce.number().int().positive(), z.number().int().min(1))),
     ALLOWED_DAYS: z
       .string()
       .default("1,3,7")
@@ -46,7 +94,17 @@ const envSchema = z
   })
   .refine((value) => Boolean(value.TURNSTILE_SITE_KEY) === Boolean(value.TURNSTILE_SECRET_KEY), {
     message: "Turnstile site and secret keys must be configured together",
-  });
+  })
+  .refine(
+    (value) => {
+      const quotaDays = Object.keys(value.QUOTA_PER_DURATION).map(Number);
+      return (
+        value.ALLOWED_DAYS.every((day) => quotaDays.includes(day)) &&
+        quotaDays.every((day) => (value.ALLOWED_DAYS as number[]).includes(day))
+      );
+    },
+    { message: "QUOTA_PER_DURATION harus memuat tepat durasi yang ada di ALLOWED_DAYS" },
+  );
 
 export type AppEnv = z.infer<typeof envSchema>;
 export type ApiServer = {

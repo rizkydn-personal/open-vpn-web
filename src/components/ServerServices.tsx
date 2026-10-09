@@ -3,6 +3,8 @@ import { ArrowLeft, Clock3 } from "lucide-react";
 import type { Meta } from "@/components/Portal";
 import { ServiceIcon } from "@/components/ServiceIcon";
 import { ServerStatusBadge } from "@/components/ServerStatusBadge";
+import { QuotaCountdown } from "@/components/QuotaCountdown";
+import { quotaTotals } from "@/components/quota";
 import { groupServicesByServer, serverHealth } from "@/lib/serverDirectory";
 
 export function ServerServices({ meta, serverId }: { meta: Meta; serverId: string }) {
@@ -20,17 +22,9 @@ export function ServerServices({ meta, serverId }: { meta: Meta; serverId: strin
   const status = meta.status?.servers?.find((item) => item.id === server.id);
   const location =
     server.location ?? (typeof status?.location === "string" ? status.location : undefined);
-  const now = Date.parse(meta.serverNow ?? "");
-  const remainingSeconds = (resetAt?: string) =>
-    resetAt && Number.isFinite(now)
-      ? Math.max(0, Math.floor((Date.parse(resetAt) - now) / 1000))
-      : null;
-  const formatCountdown = (seconds: number) =>
-    `${String(Math.floor(seconds / 3600)).padStart(2, "0")}:${String(Math.floor((seconds % 3600) / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
   return (
     <section className="server-page" aria-labelledby="server-title">
       <Link className="back-link" href="/">
-        {" "}
         <ArrowLeft size={17} aria-hidden="true" /> Semua server
       </Link>
       <header className="server-page__heading">
@@ -66,7 +60,7 @@ export function ServerServices({ meta, serverId }: { meta: Meta; serverId: strin
       </div>
       <ul className="server-service-list">
         {server.services.map((service) => {
-          const quota = meta.quota[service.id];
+          const quota = quotaTotals(meta.quota, service.id);
           const accountCount = meta.status?.accounts?.[service.id];
           const state = meta.status?.services?.[service.id];
           const stateText =
@@ -104,10 +98,7 @@ export function ServerServices({ meta, serverId }: { meta: Meta; serverId: strin
               </div>
               {quota ? (
                 <small className="server-service-list__reset">
-                  <Clock3 size={15} aria-hidden="true" /> Reset 00.00 WIB
-                  {remainingSeconds(quota.resetsAt) === null
-                    ? ""
-                    : `, dalam ${formatCountdown(remainingSeconds(quota.resetsAt)!)}`}
+                  <Clock3 size={15} aria-hidden="true" /> <QuotaCountdown resetsAt={quota.resetsAt} />
                 </small>
               ) : null}
               <Link

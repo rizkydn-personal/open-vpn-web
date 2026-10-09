@@ -29,8 +29,11 @@ const statusEnvelopeSchema = z.object({
 });
 const createEnvelopeSchema = z.object({
   data: z.object({
+    service: z.string().optional(),
     username: z.string(),
+    created_at: z.string().optional(),
     expires_at: z.string(),
+    max_sessions: z.number().int().positive().optional(),
     connection: z.record(z.string(), z.unknown()).optional().default({}),
   }),
 });
@@ -39,8 +42,11 @@ export type Service = z.infer<typeof serviceSchema>;
 export type ServerStatus = z.infer<typeof statusEnvelopeSchema>["data"];
 export type ConnectionData = Record<string, unknown>;
 export type CreatedAccount = {
+  service?: string;
   username: string;
+  created_at?: string;
   expires_at: string;
+  max_sessions?: number;
   connection: ConnectionData;
 };
 export type CachedResult<T> = { value: T; stale: boolean; fetchedAt: number };

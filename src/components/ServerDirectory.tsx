@@ -207,6 +207,15 @@ export function ServerDirectory({ meta }: { meta: Meta }) {
           </p>
         </aside>
       </section>
+      {meta.support_url ? (
+        <aside className="support-card">
+          <h2>Dukungan</h2>
+          <p>Butuh bantuan memakai detail koneksi? Hubungi dukungan lewat tautan berikut.</p>
+          <a href={meta.support_url} rel="noreferrer">
+            Informasi dukungan
+          </a>
+        </aside>
+      ) : null}
     </section>
   );
 }
