@@ -26,14 +26,23 @@ export function Navbar() {
 
   const servers = groupServicesByServer(services).map(({ id, label }) => ({ id, label }));
   return (
-    <header className="site-header">
+    <header
+      className="site-header"
+      style={{
+        background: "var(--surface)",
+        borderBottom: "1px solid var(--line)",
+        fontFamily: "var(--font-sans)",
+      }}
+    >
       <div className="site-header__inner">
         <Link className="brand" href="/" aria-label="VPN Gratis, beranda">
           <span className="brand__mark">
             <ShieldCheck size={21} strokeWidth={1.75} aria-hidden="true" />
           </span>
           <span>
-            <span className="brand__name">VPN Gratis</span>
+            <span className="brand__name">
+              VPN Gratis<span style={{ color: "var(--primary)" }}>.</span>
+            </span>
             <span className="brand__caption">rnpproject</span>
           </span>
         </Link>

@@ -2,7 +2,7 @@
 
 import { Clock3, TriangleAlert } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import type { Service, ServerStatus } from "@/lib/vpnApi";
 import { ServiceIcon } from "@/components/ServiceIcon";
 import { AccountForm } from "@/components/AccountForm";
@@ -13,6 +13,27 @@ import { ServerDirectory } from "@/components/ServerDirectory";
 import { ServerServices } from "@/components/ServerServices";
 import { useMeta } from "@/components/useMeta";
 import { quotaForDuration, type QuotaEntry, type QuotaMap } from "@/components/quota";
+
+// Token visual (didefinisikan worker tokens di src/styles/tokens.css); fallback
+// di sini menjaga tampilan tetap waras bila token belum terisi.
+const heroHeadingStyle: CSSProperties = {
+  fontFamily: "var(--font-sans, 'Plus Jakarta Sans', system-ui, sans-serif)",
+  fontWeight: 800,
+  letterSpacing: "-0.02em",
+};
+
+const sectionHeadingStyle: CSSProperties = {
+  fontFamily: "var(--font-sans, 'Plus Jakarta Sans', system-ui, sans-serif)",
+  fontWeight: 800,
+  letterSpacing: "-0.015em",
+};
+
+const quotaBoxStyle: CSSProperties = {
+  background: "var(--surface-tint, #eaf3f8)",
+  border: "1px solid color-mix(in srgb, var(--primary, #0866b5) 28%, transparent)",
+  borderRadius: "var(--radius, 12px)",
+  padding: "1rem 1.15rem",
+};
 
 export type Meta = {
   services: Service[];
@@ -76,8 +97,10 @@ function SiteStatePanel({ meta }: { meta: Meta }) {
         <circle cx="8" cy="30" r="4" />
         <circle cx="232" cy="30" r="4" />
       </svg>
-      <p className="eyebrow">Portal akun VPN</p>
-      <h1 id="site-state-title">{closed ? "Portal ditutup" : "Portal sedang dirawat"}</h1>
+      <p className="eyebrow">PORTAL AKUN VPN</p>
+      <h1 id="site-state-title" style={heroHeadingStyle}>
+        {closed ? "Portal ditutup" : "Portal sedang dirawat"}
+      </h1>
       <p>
         {meta.siteMessage ||
           (closed
@@ -180,8 +203,8 @@ function ServiceView({ meta, serviceId }: { meta: Meta; serviceId: string }) {
       <NoticeBanner meta={meta} />
       <DurationCards days={days} selected={day} onSelect={setDay} meta={meta} serviceId={serviceId} />
       <section className="panel service-account-panel" aria-label="Buat akun">
-        <div className="quota-summary-inline">
-          <h2>Kuota hari ini</h2>
+        <div className="quota-summary-inline" style={quotaBoxStyle}>
+          <h2 style={sectionHeadingStyle}>Kuota hari ini</h2>
           {quota ? (
             <>
               <p className="quota-number">

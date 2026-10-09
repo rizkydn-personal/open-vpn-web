@@ -23,9 +23,20 @@ export function QuotaCountdown({ resetsAt }: { resetsAt?: string }) {
 
   const remaining = resetsAt && now !== null ? formatCountdown(resetsAt, now) : null;
   return (
-    <span>
+    <span
+      style={{
+        display: "inline-block",
+        fontVariantNumeric: "tabular-nums",
+        background: "var(--surface-tint)",
+        borderRadius: "var(--radius-pill)",
+        padding: "0.25rem 0.75rem",
+        fontSize: "0.85rem",
+        fontWeight: 600,
+        color: "var(--ink)",
+      }}
+    >
       Reset 00.00 WIB
-      {remaining ? `, dalam ${remaining}` : ", waktu reset belum tersedia"}
+      {remaining ? `, tersisa ${remaining}` : ", waktunya belum bisa dipastikan"}
     </span>
   );
 }

@@ -24,7 +24,12 @@ export function NotFoundServices() {
       <ul className="not-found-services">
         {servers.map((server) => (
           <li key={server.id}>
-            <Link href={`/server/${encodeURIComponent(server.id)}`}>{server.label}</Link>
+            <Link
+              href={`/server/${encodeURIComponent(server.id)}`}
+              style={{ borderRadius: "var(--radius-pill)" }}
+            >
+              {server.label}
+            </Link>
           </li>
         ))}
       </ul>

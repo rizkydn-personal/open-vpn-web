@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { TriangleAlert } from "lucide-react";
+import { EyeOff, TriangleAlert } from "lucide-react";
 import type { Service, CreatedAccount } from "@/lib/vpnApi";
 import { CopyButton } from "@/components/CopyButton";
 import { formatWib } from "@/lib/time";
@@ -41,7 +41,7 @@ function Field({
     <div className="account-field">
       <dt>{label}</dt>
       <dd>
-        <span className="technical-value">{value}</span>
+        <span className="technical-value technical-value--box">{value}</span>
         <CopyButton value={copyValue ?? value} />
       </dd>
     </div>
@@ -65,7 +65,7 @@ function SshDetails({ connection }: { connection: Record<string, unknown> }) {
           .map(([port]) => port)
       : [];
   return (
-    <div className="payload-block">
+    <div className="payload-block payload-block--polish">
       <h3>Detail koneksi SSH</h3>
       <dl>
         <Field label="Host" value={textValue(connection.host)} />
@@ -74,7 +74,7 @@ function SshDetails({ connection }: { connection: Record<string, unknown> }) {
           <div className="account-field">
             <dt>Port</dt>
             <dd>
-              <span className="technical-value">{ports.join(", ")}</span>
+              <span className="technical-value technical-value--box">{ports.join(", ")}</span>
               <CopyButton value={ports.join(", ")} />
             </dd>
           </div>
@@ -105,7 +105,7 @@ function XrayDetails({
   const credentialLabel = protocol === "trojan" ? "Kata sandi" : "UUID";
   const credential = textValue(connection.uuid ?? connection.password);
   return (
-    <div className="payload-block">
+    <div className="payload-block payload-block--polish">
       <h3>Tautan koneksi siap impor</h3>
       <dl>
         <Field label={credentialLabel} value={credential} />
@@ -141,7 +141,7 @@ function OvpnDetails({ connection }: { connection: Record<string, unknown> }) {
   const content = typeof connection.content === "string" ? connection.content : "";
   const proto = textValue(connection.proto).toUpperCase();
   return (
-    <div className="payload-block">
+    <div className="payload-block payload-block--polish">
       <h3>Berkas konfigurasi OpenVPN</h3>
       <dl>
         <Field label="Host" value={textValue(connection.host)} />
@@ -150,7 +150,7 @@ function OvpnDetails({ connection }: { connection: Record<string, unknown> }) {
         <div className="account-field">
           <dt>Berkas</dt>
           <dd>
-            <span className="technical-value">{filename}</span>
+            <span className="technical-value technical-value--box">{filename}</span>
             {content ? (
               <button
                 type="button"
@@ -174,7 +174,7 @@ function GenericDetails({ connection }: { connection: Record<string, unknown> })
   );
   if (entries.length === 0) return null;
   return (
-    <div className="payload-block">
+    <div className="payload-block payload-block--polish">
       <h3>Detail koneksi</h3>
       <dl>
         {entries.map(([key, value]) => (
@@ -361,7 +361,90 @@ export function AccountForm({
         .map(([key, value]) => `${key}: ${textValue(value)}`),
     ].join("\n");
     return (
-      <section className="panel result-card" aria-live="polite">
+      <section className="panel result-card result-card--polish" aria-live="polite">
+        <style>{`
+          /* Restyle kartu hasil akun (milik worker restyle): bahasa visual baru via token CSS. */
+          .result-card.result-card--polish {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-soft);
+            padding: clamp(1.25rem, 4vw, 2rem);
+          }
+          .result-card--polish > h2 {
+            font-family: var(--font-sans);
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            margin: 0 0 1rem;
+          }
+          .result-once.result-once--polish {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.6rem;
+            background: var(--warm-tint);
+            border: 1px solid var(--warm);
+            border-radius: var(--radius);
+            padding: 0.75rem 1rem;
+            font-size: 0.92rem;
+            color: var(--ink);
+          }
+          .result-once--polish > svg {
+            flex: none;
+            margin-top: 0.2rem;
+          }
+          .account-facts.account-facts--polish dt {
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--muted);
+          }
+          .account-facts.account-facts--polish dd {
+            color: var(--ink);
+            font-weight: 600;
+          }
+          .technical-value.technical-value--box {
+            display: inline-block;
+            background: var(--surface-tint);
+            border: 1px solid var(--line);
+            border-radius: 0.5rem;
+            padding: 0.3rem 0.65rem;
+            color: var(--ink);
+          }
+          .payload-block.payload-block--polish {
+            background: var(--surface-tint);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+          }
+          .payload-block--polish h3 {
+            font-family: var(--font-sans);
+            color: var(--ink);
+          }
+          .copy-button.copy-button--pill {
+            border-radius: var(--radius-pill);
+            min-height: 0;
+            padding: 0.35rem 0.8rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+          }
+          .copy-button.copy-button--pill:hover {
+            border-color: var(--primary);
+            background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+          }
+          .copy-button.copy-button--pill:focus-visible {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+          }
+          .result-actions__lead .copy-button.copy-button--pill {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #fff;
+          }
+          .result-actions__lead .copy-button.copy-button--pill:hover {
+            background: var(--primary-hover);
+            border-color: var(--primary-hover);
+          }
+        `}</style>
         <h2 ref={resultHeading} tabIndex={-1}>
           Akun berhasil dibuat
         </h2>
@@ -369,11 +452,14 @@ export function AccountForm({
           <TriangleAlert aria-hidden="true" />
           Detail akun tersimpan sementara di tab ini, maksimal 30 menit. Salin atau unduh sekarang.
         </p>
-        <p className="result-once">
-          <strong>Hanya tampil sekali.</strong> Setelah tab ini ditutup, detail tidak dapat dilihat
-          lagi.
+        <p className="result-once result-once--polish">
+          <EyeOff size={18} aria-hidden="true" />
+          <span>
+            <strong>Hanya tampil sekali.</strong> Setelah tab ini ditutup, detail tidak dapat
+            dilihat lagi.
+          </span>
         </p>
-        <dl className="account-facts">
+        <dl className="account-facts account-facts--polish">
           <div>
             <dt>Layanan</dt>
             <dd>{service.service_label ?? service.label}</dd>
@@ -414,7 +500,9 @@ export function AccountForm({
           <GenericDetails connection={connection} />
         )}
         <div className="result-actions">
-          <CopyButton label="Salin semua detail" value={allText} />
+          <span className="result-actions__lead">
+            <CopyButton label="Salin semua detail" value={allText} />
+          </span>
           <button className="button-secondary" type="button" onClick={() => setResult(null)}>
             Buat lagi
           </button>

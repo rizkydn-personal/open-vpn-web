@@ -1,8 +1,15 @@
 import type { Metadata, Viewport } from "next";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import Link from "next/link";
 import { Navbar } from "@/components/Navbar";
 import { getEnv } from "@/lib/env";
 import "./globals.css";
+
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-jakarta",
+});
 
 const description =
   "Portal untuk membuat akun VPN. Detail koneksi tersedia sementara di tab browser agar dapat disalin atau diunduh.";
@@ -14,7 +21,7 @@ export const metadata: Metadata = {
     : {}),
   openGraph: { title: "VPN Gratis | Portal Akun VPN", description },
 };
-export const viewport: Viewport = { themeColor: "#035AA6" };
+export const viewport: Viewport = { themeColor: "#0866b5" };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   // Defensif saat build/prerender tanpa env lengkap: footer dukungan disembunyikan.
@@ -25,7 +32,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     supportUrl = undefined;
   }
   return (
-    <html lang="id">
+    <html lang="id" className={jakarta.variable}>
       <body>
         <a className="skip-link" href="#main-content">
           Lewati ke konten

@@ -1,8 +1,46 @@
 import Link from "next/link";
+import type { CSSProperties } from "react";
 import { ArrowRight, Gauge, Server as ServerIcon, Users } from "lucide-react";
 import type { Meta } from "@/components/Portal";
 import { ServerStatusBadge } from "@/components/ServerStatusBadge";
 import { groupServicesByServer, serverAccountTotal, serverHealth } from "@/lib/serverDirectory";
+
+// Token visual (didefinisikan worker tokens di src/styles/tokens.css); fallback
+// di sini menjaga tampilan tetap waras bila token belum terisi.
+const heroHeadingStyle: CSSProperties = {
+  fontFamily: "var(--font-sans, 'Plus Jakarta Sans', system-ui, sans-serif)",
+  fontWeight: 800,
+  letterSpacing: "-0.02em",
+};
+
+const sectionHeadingStyle: CSSProperties = {
+  fontFamily: "var(--font-sans, 'Plus Jakarta Sans', system-ui, sans-serif)",
+  fontWeight: 800,
+  letterSpacing: "-0.015em",
+};
+
+const cardStyle: CSSProperties = {
+  background: "var(--surface, #ffffff)",
+  border: "1px solid var(--line, rgba(24, 51, 69, 0.14))",
+  borderRadius: "var(--radius-lg, 20px)",
+  boxShadow: "var(--shadow-soft, 0 12px 32px rgba(24, 51, 69, 0.08))",
+};
+
+const chipStyle: CSSProperties = {
+  borderRadius: "var(--radius-pill, 999px)",
+  background: "var(--surface-tint, #eaf3f8)",
+  border: "1px solid transparent",
+};
+
+const chipOffStyle: CSSProperties = {
+  borderRadius: "var(--radius-pill, 999px)",
+};
+
+const noteStyle: CSSProperties = {
+  background: "var(--surface-tint, #eaf3f8)",
+  border: "1px solid color-mix(in srgb, var(--primary, #0866b5) 28%, transparent)",
+  borderRadius: "var(--radius, 12px)",
+};
 
 const protocolDetails: Record<string, string> = {
   ssh: "Hasilnya host, port, username, dan kata sandi untuk dimasukkan ke aplikasi tunnel SSH.",
@@ -40,13 +78,13 @@ export function ServerDirectory({ meta }: { meta: Meta }) {
   return (
     <section className="server-directory" aria-labelledby="server-directory-title">
       <header className="server-directory__hero">
-        <p className="eyebrow">Portal akun VPN</p>
-        <h1 id="server-directory-title">
+        <p className="eyebrow">PORTAL AKUN VPN</p>
+        <h1 id="server-directory-title" style={heroHeadingStyle}>
           Buat akun VPN gratis untuk {listDays(meta.allowed_days)}.
         </h1>
         <p className="server-directory__intro">
-          Pilih server dan protokol, buat akunnya, lalu salin detail koneksi. Detail disimpan di tab
-          ini selama paling lama 30 menit.
+          Pilih server dan protokol yang paling cocok, buat akunnya, lalu salin detail koneksi.
+          Detailnya hanya tersimpan di tab ini selama 30 menit, jadi jangan sampai terlewat.
         </p>
       </header>
       {meta.unavailable ? (
@@ -58,7 +96,7 @@ export function ServerDirectory({ meta }: { meta: Meta }) {
         </p>
       ) : null}
       <div className="server-directory__selection">
-        <h2 id="server-selection-title">Pilih server</h2>
+        <h2 id="server-selection-title" style={sectionHeadingStyle}>Pilih server</h2>
         <p>Buka satu server untuk melihat status tiap protokol dan sisa kuota hari ini.</p>
       </div>
       {servers.length ? (
@@ -74,7 +112,11 @@ export function ServerDirectory({ meta }: { meta: Meta }) {
             const accounts = serverAccountTotal(server, meta.status?.accounts);
             return (
               <li key={server.id}>
-                <Link className="server-card" href={`/server/${encodeURIComponent(server.id)}`}>
+                <Link
+                  className="server-card"
+                  href={`/server/${encodeURIComponent(server.id)}`}
+                  style={cardStyle}
+                >
                   <span className="server-card__head">
                     <span className="server-card__icon">
                       <ServerIcon aria-hidden="true" />
@@ -93,6 +135,7 @@ export function ServerDirectory({ meta }: { meta: Meta }) {
                         <span
                           className={service.available ? "chip" : "chip chip--off"}
                           key={service.id}
+                          style={service.available ? chipStyle : chipOffStyle}
                         >
                           {service.service_label ?? service.label}
                           {service.available ? null : (
@@ -147,7 +190,7 @@ export function ServerDirectory({ meta }: { meta: Meta }) {
 
       <section className="portal-guide" aria-labelledby="portal-guide-title">
         <header className="portal-guide__heading">
-          <h2 id="portal-guide-title">Cara kerja</h2>
+          <h2 id="portal-guide-title" style={sectionHeadingStyle}>Cara kerja</h2>
         </header>
 
         <ol className="portal-guide__steps">
@@ -176,7 +219,7 @@ export function ServerDirectory({ meta }: { meta: Meta }) {
 
         {protocols.length ? (
           <section className="protocol-guide" aria-labelledby="protocol-guide-title">
-            <h2 id="protocol-guide-title">Mengenal protokol</h2>
+            <h2 id="protocol-guide-title" style={sectionHeadingStyle}>Mengenal protokol</h2>
             <p>
               Tiap protokol memberi detail koneksi yang berbeda. Pakai persis yang tampil setelah
               akun dibuat.
@@ -198,8 +241,8 @@ export function ServerDirectory({ meta }: { meta: Meta }) {
           </section>
         ) : null}
 
-        <aside className="portal-guide__note">
-          <h2>Kuota dan penyimpanan detail</h2>
+        <aside className="portal-guide__note" style={noteStyle}>
+          <h2 style={sectionHeadingStyle}>Kuota dan penyimpanan detail</h2>
           <p>
             Kuota dihitung per layanan dan kembali penuh setiap pukul 00.00 WIB. Detail akun
             disimpan sementara di tab ini (session storage) selama paling lama 30 menit, jadi salin
@@ -209,8 +252,8 @@ export function ServerDirectory({ meta }: { meta: Meta }) {
       </section>
       {meta.support_url ? (
         <aside className="support-card">
-          <h2>Dukungan</h2>
-          <p>Butuh bantuan memakai detail koneksi? Hubungi dukungan lewat tautan berikut.</p>
+          <h2 style={sectionHeadingStyle}>Dukungan</h2>
+          <p>Bingung memakai detail koneksi? Tim dukungan siap membantu lewat tautan berikut.</p>
           <a href={meta.support_url} rel="noreferrer">
             Informasi dukungan
           </a>

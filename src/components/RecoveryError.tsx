@@ -8,12 +8,27 @@ export function RecoveryError({ retry, digest }: { retry: () => void; digest?: s
     .slice(-8)
     .toUpperCase();
   return (
-    <section className="recovery-page" aria-labelledby="recovery-title">
+    <section
+      className="recovery-page"
+      aria-labelledby="recovery-title"
+      style={{
+        background: "var(--surface)",
+        border: "1px solid var(--line)",
+        borderRadius: "var(--radius-lg)",
+        boxShadow: "var(--shadow-soft)",
+        padding: "clamp(1.5rem, 4vw, 2.5rem)",
+      }}
+    >
       <p className="eyebrow">Terjadi kendala</p>
       <h1 id="recovery-title">Halaman ini belum dapat ditampilkan.</h1>
       <p>Coba muat ulang bagian ini. Jika perlu bantuan, sampaikan kode kejadian berikut.</p>
       <p className="recovery-code">Kode kejadian: {digest?.slice(0, 8) ?? id}</p>
-      <button className="button-primary" type="button" onClick={retry}>
+      <button
+        className="button-primary"
+        type="button"
+        onClick={retry}
+        style={{ borderRadius: "var(--radius-pill)" }}
+      >
         Coba lagi
       </button>
     </section>

@@ -6,13 +6,7 @@
   color-scheme: light;
   background: var(--bg);
   color: var(--ink);
-  font-family:
-    ui-sans-serif,
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    sans-serif;
+  font-family: var(--font-sans);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -32,6 +26,7 @@ body {
   display: flex;
   flex-direction: column;
   line-height: 1.6;
+  font-family: var(--font-sans);
 }
 a {
   color: inherit;
@@ -44,6 +39,10 @@ a {
 :focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 3px;
+}
+::selection {
+  background: color-mix(in srgb, var(--primary) 20%, #fff);
+  color: var(--ink);
 }
 /* Tailwind's reset flattens heading weight; restore a clear hierarchy. */
 h1,

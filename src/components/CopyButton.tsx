@@ -19,15 +19,15 @@ export function CopyButton({ value, label = "Salin" }: { value: string; label?: 
     window.setTimeout(() => setDone(false), 1800);
   }
   return (
-    <button type="button" className="copy-button" onClick={copy}>
+    <button type="button" className="copy-button copy-button--pill" onClick={copy}>
       <span aria-live="polite">
         {done ? (
           <>
-            <Check size={16} aria-hidden="true" /> Tersalin
+            <Check size={14} aria-hidden="true" /> Tersalin
           </>
         ) : (
           <>
-            <Copy size={16} aria-hidden="true" /> {label}
+            <Copy size={14} aria-hidden="true" /> {label}
           </>
         )}
       </span>

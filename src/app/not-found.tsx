@@ -18,7 +18,11 @@ export default function NotFound() {
       <p className="eyebrow">404</p>
       <h1 id="not-found-title">Halaman ini tidak ada di portal.</h1>
       <p>Alamatnya mungkin berubah atau tautannya sudah tidak berlaku.</p>
-      <Link className="button-primary recovery-home" href="/">
+      <Link
+        className="button-primary recovery-home"
+        href="/"
+        style={{ borderRadius: "var(--radius-pill)" }}
+      >
         Kembali ke beranda
       </Link>
       <NotFoundServices />

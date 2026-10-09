@@ -12,9 +12,9 @@ Tuning dials: Density 6, Motion 2, Variance 3. Alasan satu baris: portal padat d
 |---|---|
 | Pattern | Alur tugas berurutan: beranda (daftar server) > halaman server (baris protokol) > halaman layanan (kartu durasi > form buat > kartu hasil). Satu aksi utama per layar. |
 | Style | Portal utilitas yang jujur dan tenang. Keywords: jelas, ringkas, cepat, terbaca. |
-| Colors | Token tetap: latar #F2F2F2, permukaan #FFFFFF, tinta #183345, muted #526573, aksi utama #035AA6, aksen grafis #049DD9, tint #04B2D9, peringatan #F2C438, galat #B42318. Satu aksen: deep blue. Alasan: kontras AA di atas putih dan asosiasi kepercayaan untuk layanan koneksi. |
-| Typography | System sans stack, tanpa webfont (nol render-blocking, glif Indonesia dijamin). Monospace hanya untuk nilai teknis yang disalin. Skala: h1 clamp(2rem,5vw,3rem), h2 seksi 1.2-1.35rem, body 1rem/0.92rem sekunder. |
-| Effects | Border 1px var(--line), radius 0.55-0.8rem, tanpa shadow kecuali dropdown menu. Transisi 0.15s warna/border saja. Hover: border primary + sky-tint, tanpa layout shift. |
+| Colors | Token rasa referensi (2026-10-10, dari 3 web milik pemilik): latar warm off-white #F7F8F8, permukaan #FFFFFF + tint #EAF3F8, tinta #183345, muted #526573, aksi utama #0866b5 (5.87:1 di atas putih, lolos AA), aksen grafis #049DD9, tint #04B2D9, warm #F2C438 dipakai berani, galat #B42318. Satu aksen: deep blue. Alasan: palet netral lama terbaca sebagai template generik oleh pemilik; arah baru mengikuti selera dari web-webnya sendiri. |
+| Typography | Plus Jakarta Sans via next/font/google (400-800, latin, self-hosted saat build) untuk body + heading; monospace hanya untuk nilai teknis yang disalin. Skala: h1 clamp(2rem,5vw,3rem) 800 dengan letter-spacing ketat, h2 seksi 1.2-1.35rem, body 1rem/0.92rem sekunder. Alasan: Plus Jakarta Sans adalah ciri khas di semua web milik pemilik; terbaca hangat dan tidak default. |
+| Effects | Border 1px var(--line) (ink 10%), radius 12px / 20px / pill 999px, shadow lembut opacity rendah var(--shadow-soft). Transisi 0.15s warna/border saja. Hover: border primary + tint, tanpa layout shift. Alasan: permukaan lembut + pill adalah bahasa visual web-web milik pemilik. |
 | Avoid | Gradien ungu, glassmorphism massal, glow, ikon emoji, tombol raksasa full-width di desktop, hero generik + 3 kolom, fade-up di semua elemen, lencana kapsul tanpa teks. |
 
 ## Decisions log
@@ -26,16 +26,18 @@ Tuning dials: Density 6, Motion 2, Variance 3. Alasan satu baris: portal padat d
 - Brand disatukan: navbar "VPN Gratis" + caption "rnpproject", footer "VPN Gratis · rnpproject". Alasan: inkonsistensi brand merusak kepercayaan.
 - Hitung mundur kuota diisolasi ke komponen QuotaCountdown: interval 1 detik tidak me-render ulang seluruh halaman. Alasan: menghemat CPU/baterai ponsel.
 - 211 baris JSX mati + ~200 baris CSS mati dihapus setelah verifikasi grep tidak ada import. Alasan: kode mati adalah sumber bug dan kebingungan.
+- Restyle rasa 2026-10-10 (7 worker paralel): token → warm off-white #F7F8F8, primary #0866b5, Plus Jakarta Sans, radius 12/20/pill, border 1px subtle, shadow lembut. Struktur/alur/fitur tidak berubah. Alasan: pemilik menilai hasil revamp "masih ai slop" dan mengirim 3 web miliknya sebagai referensi selera; analisis CSS asli ketiga web didistilasi ke notes/TASTE.md dan diterapkan.
 
-## Visual system
+## Visual system (arah rasa 2026-10-10, dari 3 web milik pemilik — lihat notes/TASTE.md)
 
-- Use the fixed light palette: page `#F2F2F2`, surfaces `#FFFFFF`, primary text `#183345`, muted text `#526573`, primary action and focus `#035AA6`, graphic accent `#049DD9`, limited tint `#04B2D9`, and optional support or light-warning area `#F2C438`.
+- Use the warm light palette: page `#F7F8F8`, surfaces `#FFFFFF` + tint `#EAF3F8`, primary text `#183345`, muted text `#526573`, primary action and focus `#0866b5` (5.87:1 on white, AA), graphic accent `#049DD9`, limited tint `#04B2D9`, warm `#F2C438` used boldly for highlights, not only warnings.
 - Use deep red `#B42318` only for form errors, always with a left rule and bold text so meaning does not rely on color. It passes AA on both the page and surface colors (checked by `npm run check:contrast`).
 - Show notices (stale data, partial outages) as an ink-on-warm-tint callout with a warm left rule, never as red body text, which fails contrast on the page background.
 - Keep the theme light because the specified palette is designed for light backgrounds and the portal is used on phones during the day.
 - Use one path line in deep blue to connect a device to a server, touching service points. Repeat it only in loading, 404, and maintenance views because it describes the product's connection tunnel.
 - Use Lucide icons only when they identify a service or communicate a real action; avoid decorative icons beside generic headings.
-- Use the system sans-serif stack to keep Indonesian text readable on small screens without downloading a font. Use monospace only for connection values that users need to copy.
+- Use Plus Jakarta Sans (next/font/google, self-hosted at build) for body and headings; it is the signature typeface across the owner's own sites. Use monospace only for connection values that users need to copy.
+- Round pills (999px) for chips, badges, and small buttons; 12px/20px radii for cards and panels; 1px subtle borders and low-opacity soft shadows.
 
 ## Page rhythm and behavior
 
