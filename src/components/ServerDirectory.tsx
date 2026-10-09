@@ -81,7 +81,7 @@ export function ServerDirectory({ meta }: { meta: Meta }) {
                     </span>
                     <span className="server-card__title">
                       <strong>{server.label}</strong>
-                      <span>{location ?? "Lokasi belum diatur"}</span>
+                      {location ? <span>{location}</span> : null}
                     </span>
                     <ArrowRight className="server-card__arrow" aria-hidden="true" />
                   </span>

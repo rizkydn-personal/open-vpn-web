@@ -35,12 +35,12 @@ export function ServerServices({ meta, serverId }: { meta: Meta; serverId: strin
             health={serverHealth(meta.status?.servers, server.id, meta.statusUnavailable)}
             available={server.services.filter((service) => service.available).length}
           />
-          <span className="server-location">{location ?? "Lokasi belum diatur"}</span>
-          <span className="server-uptime">
-            {typeof status?.uptime_seconds === "number"
-              ? `Uptime ${Math.floor(status.uptime_seconds / 3600)} jam`
-              : "Uptime belum tersedia"}
-          </span>
+          {location ? <span className="server-location">{location}</span> : null}
+          {typeof status?.uptime_seconds === "number" ? (
+            <span className="server-uptime">
+              Uptime {Math.floor(status.uptime_seconds / 3600)} jam
+            </span>
+          ) : null}
         </div>
         <p className="server-page__description">
           Setiap baris menunjukkan status protokol, jumlah akun, dan sisa kuota hari ini. Kuota
