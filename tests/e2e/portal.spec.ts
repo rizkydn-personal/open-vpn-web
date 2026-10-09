@@ -65,14 +65,14 @@ test("mobile menu exposes services and service page has no serious accessibility
 }) => {
   await page.setViewportSize({ width: 360, height: 640 });
   await page.goto("/");
-  const toggle = page.getByRole("button", { name: /Server/ });
+  const toggle = page.getByRole("button", { name: /Menu/ });
   await toggle.click();
   await expect(page.getByRole("link", { name: "Uji", exact: true })).toBeVisible();
   await page.getByRole("link", { name: "Uji", exact: true }).click();
-  await page.getByRole("button", { name: /Layanan/ }).click();
+  await page.getByRole("button", { name: /Menu/ }).click();
   await expect(page.getByRole("link", { name: "SSH", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "VMess", exact: true })).toBeVisible();
-  await page.getByRole("button", { name: /Layanan/ }).click();
+  await page.getByRole("button", { name: /Menu/ }).click();
   await expect(page.getByRole("link", { name: "Pilih OpenVPN UDP", exact: true })).toBeVisible();
   await page.getByRole("link", { name: "Pilih VMess", exact: true }).click();
   await expect(page).toHaveURL(/\/s\/e2e--vmess$/);

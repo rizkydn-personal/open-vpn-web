@@ -81,8 +81,9 @@ function SshDetails({ connection }: { connection: Record<string, unknown> }) {
         ) : null}
       </dl>
       <p className="muted">
-        Masukkan host, username, kata sandi, dan salah satu port di atas ke aplikasi SSH atau
-        tunneling.
+        {ports.length > 0
+          ? "Masukkan host, username, kata sandi, dan salah satu port di atas ke aplikasi SSH atau tunneling."
+          : "Masukkan host, username, dan kata sandi ke aplikasi SSH atau tunneling."}
       </p>
     </div>
   );

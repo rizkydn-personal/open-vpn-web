@@ -54,15 +54,10 @@ export function ServiceMenu({
         aria-controls="service-menu"
         onClick={() => setOpen(!open)}
       >
-        <Menu size={19} aria-hidden="true" /> {serverId ? "Layanan" : "Server"}{" "}
-        <ChevronDown size={16} aria-hidden="true" />
+        <Menu size={19} aria-hidden="true" /> Menu <ChevronDown size={16} aria-hidden="true" />
       </button>
       {open && (
-        <nav
-          id="service-menu"
-          className="mobile-menu__panel"
-          aria-label={serverId ? "Navigasi layanan" : "Navigasi server"}
-        >
+        <nav id="service-menu" className="mobile-menu__panel" aria-label="Navigasi">
           <Link
             href="/"
             aria-current={pathname === "/" ? "page" : undefined}
@@ -70,8 +65,25 @@ export function ServiceMenu({
           >
             Beranda
           </Link>
-          {serverId
-            ? currentServerServices.map((service) => (
+          {serverId ? (
+            currentServerServices.map((service) => (
+              <Link
+                key={service.id}
+                href={`/s/${encodeURIComponent(service.id)}`}
+                aria-current={
+                  pathname === `/s/${encodeURIComponent(service.id)}` ? "page" : undefined
+                }
+                onClick={() => setOpen(false)}
+              >
+                <ServiceIcon id={service.id} size={20} /> {service.service_label ?? service.label}
+              </Link>
+            ))
+          ) : (
+            <>
+              <p className="mobile-menu__heading">
+                Semua layanan
+              </p>
+              {services.map((service) => (
                 <Link
                   key={service.id}
                   href={`/s/${encodeURIComponent(service.id)}`}
@@ -82,8 +94,11 @@ export function ServiceMenu({
                 >
                   <ServiceIcon id={service.id} size={20} /> {service.service_label ?? service.label}
                 </Link>
-              ))
-            : servers.map((server) => (
+              ))}
+              <p className="mobile-menu__heading">
+                Server
+              </p>
+              {servers.map((server) => (
                 <Link
                   key={server.id}
                   href={`/server/${encodeURIComponent(server.id)}`}
@@ -93,6 +108,8 @@ export function ServiceMenu({
                   <span className="server-nav-mark" aria-hidden="true" /> {server.label}
                 </Link>
               ))}
+            </>
+          )}
         </nav>
       )}
     </div>

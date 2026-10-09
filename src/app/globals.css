@@ -201,6 +201,14 @@ h4 {
   background: var(--sky-tint);
   color: var(--primary);
 }
+.mobile-menu__heading {
+  margin: 0.5rem 0.65rem 0.15rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
 .mobile-menu__panel small {
   margin-left: auto;
   color: var(--muted);
