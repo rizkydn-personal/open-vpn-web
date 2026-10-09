@@ -29,7 +29,7 @@ Jalankan sebagai proses Node.js biasa dengan systemd atau PM2. Isi konfigurasi A
 | Variabel                                                               |                 Default | Fungsi                                                                                    |
 | ---------------------------------------------------------------------- | ----------------------: | ----------------------------------------------------------------------------------------- |
 | `VPN_API_BASE_URL`                                                     | `http://127.0.0.1:8089` | Basis URL API VPN utama                                                                   |
-| `VPN_API_SERVERS`                                                      |                  kosong | JSON array server; tiap server dapat memiliki `label`, `location`, dan `dailyLimit` sendiri |
+| `VPN_API_SERVERS`                                                      |                  kosong | JSON array server; tiap server dapat memiliki `label`, `location`, `dailyLimit`, serta `capacity` dan `bandwidth` opsional untuk kartu server |
 | `VPN_API_KEY`                                                          |                   wajib | Kunci untuk API, hanya di server                                                          |
 | `DAILY_LIMIT_PER_SERVICE`                                              |                    `10` | Kuota global per layanan per hari                                                         |
 | `ALLOWED_DAYS`                                                         |                 `1,3,7` | Durasi yang dapat dipilih                                                                 |

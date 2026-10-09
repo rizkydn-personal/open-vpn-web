@@ -17,7 +17,7 @@ Gunakan systemd atau PM2 agar proses otomatis dimulai kembali ketika VM reboot a
 Simpan environment di luar repository dengan permission `0600`. Wajib diisi:
 
 ```dotenv
-VPN_API_SERVERS=[{"id":"vm1","label":"Server 1","location":"Jakarta, Indonesia","baseUrl":"https://api.example.com","apiKey":"...","dailyLimit":10}]
+VPN_API_SERVERS=[{"id":"vm1","label":"Server 1","location":"Jakarta, Indonesia","baseUrl":"https://api.example.com","apiKey":"...","dailyLimit":10,"capacity":150,"bandwidth":"Unlimited"}]
 FIREBASE_PROJECT_ID=...
 FIREBASE_CLIENT_EMAIL=...
 FIREBASE_PRIVATE_KEY=-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n
@@ -30,7 +30,7 @@ PORT=3000
 QUOTA_STORE=firestore
 ```
 
-`VPN_API_SERVERS` dapat memuat beberapa server. Beranda portal menampilkan kartu untuk tiap server; memilihnya membuka protokol yang tersedia di server itu. Isi `location` pada tiap objek agar lokasi tampil di kartu dan detail server. Status unit API (`xray`, `vpn-openvpn-tcp`, `vpn-openvpn-udp`) dipetakan ke protokol katalog terkait. Setiap layanan dan kuotanya diisolasi per server. Atur `dailyLimit` per server bila perlu; tanpa nilai itu, `DAILY_LIMIT_PER_SERVICE` dipakai. API server harus dapat dijangkau melalui HTTPS dan tetap memakai header API key.
+`VPN_API_SERVERS` dapat memuat beberapa server. Beranda portal menampilkan kartu untuk tiap server; memilihnya membuka protokol yang tersedia di server itu. Isi `location` pada tiap objek agar lokasi tampil di kartu dan detail server. Status unit API (`xray`, `vpn-openvpn-tcp`, `vpn-openvpn-udp`) dipetakan ke protokol katalog terkait. Setiap layanan dan kuotanya diisolasi per server. Isi `capacity` (jumlah akun maksimum, bilangan bulat) dan `bandwidth` (teks bebas, maksimal 40 karakter) bila ingin kartu server menampilkan kapasitas dan bandwidth; tanpa nilai itu, kartu hanya menampilkan jumlah akun tercatat dari API dan baris bandwidth disembunyikan. Atur `dailyLimit` per server bila perlu; tanpa nilai itu, `DAILY_LIMIT_PER_SERVICE` dipakai. API server harus dapat dijangkau melalui HTTPS dan tetap memakai header API key.
 
 ### Saklar maintenance darurat
 
