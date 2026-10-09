@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { groupServicesByServer } from "@/lib/serverDirectory";
 import type { Service } from "@/lib/vpnApi";
 
 export function NotFoundServices() {
@@ -16,20 +17,19 @@ export function NotFoundServices() {
       .catch(() => undefined);
     return () => controller.abort();
   }, []);
-  return services.length ? (
-    <nav aria-label="Layanan yang tersedia">
-      <h2>Layanan yang tersedia</h2>
+  const servers = groupServicesByServer(services);
+  return servers.length ? (
+    <nav aria-label="Server yang tersedia">
+      <h2>Atau buka salah satu server</h2>
       <ul className="not-found-services">
-        {services.map((service) => (
-          <li key={service.id}>
-            <Link href={`/s/${encodeURIComponent(service.id)}`}>
-              {service.label} {service.available ? "" : "(sedang tidak tersedia)"}
-            </Link>
+        {servers.map((server) => (
+          <li key={server.id}>
+            <Link href={`/server/${encodeURIComponent(server.id)}`}>{server.label}</Link>
           </li>
         ))}
       </ul>
     </nav>
   ) : (
-    <p role="status">Daftar layanan belum dapat dimuat.</p>
+    <p role="status">Daftar server belum dapat dimuat.</p>
   );
 }
