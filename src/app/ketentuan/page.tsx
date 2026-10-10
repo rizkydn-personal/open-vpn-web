@@ -1,8 +1,8 @@
 export const metadata = { title: "Ketentuan" };
 export default function Ketentuan() {
   return (
-    <article className="panel legal">
-      <h1>Ketentuan layanan</h1>
+    <article className="panel legal" style={{ borderRadius: "var(--radius-lg)" }}>
+      <h1 style={{ fontFamily: "var(--font-sans)" }}>Ketentuan layanan</h1>
       <p>Terakhir diperbarui: 8 Oktober 2026.</p>
       <p>
         Layanan ini disediakan gratis apa adanya tanpa jaminan ketersediaan atau kesesuaian untuk

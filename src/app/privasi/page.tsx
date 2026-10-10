@@ -1,8 +1,8 @@
 export const metadata = { title: "Privasi" };
 export default function Privasi() {
   return (
-    <article className="panel legal">
-      <h1>Kebijakan privasi</h1>
+    <article className="panel legal" style={{ borderRadius: "var(--radius-lg)" }}>
+      <h1 style={{ fontFamily: "var(--font-sans)" }}>Kebijakan privasi</h1>
       <p>Terakhir diperbarui: 8 Oktober 2026.</p>
       <p>
         Aplikasi web tidak menyimpan kredensial hasil di database atau log. Untuk pembatasan

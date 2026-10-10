@@ -1,8 +1,8 @@
 import { randomBytes, randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { getEnv } from "@/lib/env";
-import { getSiteSettings, releaseQuota, reserveQuota } from "@/lib/firestore";
+import { getEnv, durationLimits } from "@/lib/env";
+import { commitQuota, getSiteSettings, releaseQuota, reserveQuota } from "@/lib/firestore";
 import { guardAccountRequest, isPayloadTooLarge } from "@/lib/requestGuard";
 import { clientIpHash, reserveCreateAttempt, verifyTurnstile } from "@/lib/rateLimit";
 import { nextResetAt } from "@/lib/time";
@@ -94,6 +94,8 @@ export async function POST(request: Request) {
     if (!(await verifyTurnstile(request.headers.get("cf-turnstile-response"), forwarded, env)))
       return error(422, "verification_failed");
     const now = new Date();
+    const days = parsed.data.days as 1 | 3 | 7;
+    const durationLimit = durationLimits(env, service.daily_limit)[days] ?? 1;
     let attempt;
     try {
       attempt = await reserveCreateAttempt(request.headers, service.id, now, env);
@@ -106,11 +108,7 @@ export async function POST(request: Request) {
       });
     let reservation;
     try {
-      reservation = await reserveQuota(
-        service.id,
-        now,
-        service.daily_limit ?? env.DAILY_LIMIT_PER_SERVICE,
-      );
+      reservation = await reserveQuota(service.id, now, durationLimit, days);
     } catch {
       return error(503, "store_unavailable", "Penyimpanan kuota sedang tidak dapat dihubungi.");
     }
@@ -118,7 +116,7 @@ export async function POST(request: Request) {
       logCreate(
         requestId,
         service.id,
-        parsed.data.days,
+        days,
         clientIpHash(request.headers, env),
         "quota_exhausted",
       );
@@ -127,44 +125,65 @@ export async function POST(request: Request) {
           error: { code: "quota_exhausted", message: "Kuota layanan hari ini habis." },
           data: {
             used: reservation.used,
-            limit: service.daily_limit ?? env.DAILY_LIMIT_PER_SERVICE,
+            limit: durationLimit,
             resetsAt: nextResetAt(now).toISOString(),
           },
         },
-        { status: 409, headers: { "Cache-Control": "no-store" } },
+        { status: 429, headers: { "Cache-Control": "no-store" } },
       );
     }
+    // Finalisasi reservasi bersifat best-effort: bila gagal, reservasi kedaluwarsa
+    // sendiri dalam RESERVATION_TTL_MS dan direklamasi (tidak ada kuota yatim).
+    const finalize = async (finalizeFn: () => Promise<void>): Promise<void> => {
+      try {
+        await finalizeFn();
+      } catch (finalizeError) {
+        console.error(
+          JSON.stringify({
+            event: "quota_finalize_failed",
+            request_id: requestId,
+            error: finalizeError instanceof Error ? finalizeError.message : "unknown",
+          }),
+        );
+      }
+    };
     try {
       const result = await createAccount(
         {
           service: service.upstream_id ?? service.id,
-          days: parsed.data.days,
+          days,
           username: username(),
         },
         randomUUID(),
         service.server_id,
       );
-      logCreate(requestId, service.id, parsed.data.days, clientIpHash(request.headers, env), "ok");
+      await finalize(() => commitQuota(service.id, reservation.day, days, reservation.reservationId));
+      logCreate(requestId, service.id, days, clientIpHash(request.headers, env), "ok");
       return NextResponse.json(
         { data: result },
         { status: 201, headers: { "Cache-Control": "no-store" } },
       );
     } catch (cause) {
       if (cause instanceof ApiError && cause.uncertain) {
+        // Respons hilang di tengah jalan: akun mungkin sudah terbuat di upstream,
+        // jadi kuota ditahan (commit) seperti perilaku sebelumnya.
+        await finalize(() =>
+          commitQuota(service.id, reservation.day, days, reservation.reservationId),
+        );
         logCreate(
           requestId,
           service.id,
-          parsed.data.days,
+          days,
           clientIpHash(request.headers, env),
           "unknown",
         );
         return error(504, "creation_unknown");
       }
-      await releaseQuota(service.id, reservation.day);
+      await releaseQuota(service.id, reservation.day, days, reservation.reservationId);
       logCreate(
         requestId,
         service.id,
-        parsed.data.days,
+        days,
         clientIpHash(request.headers, env),
         "fail",
       );

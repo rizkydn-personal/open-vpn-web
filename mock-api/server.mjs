@@ -112,7 +112,7 @@ const server = http.createServer(async (request, response) => {
         : `w${Math.random().toString(32).slice(2, 9)}`;
     const connection =
       body.service === "ssh"
-        ? { host: "mock.local", port: 22, password: "mock-password" }
+        ? { host: "mock.local", password: "mock-password", ports: { 22: true, 80: true, 443: true } }
         : body.service.startsWith("ovpn-")
           ? {
               host: "mock.local",

@@ -2,12 +2,38 @@
 
 import { Clock3, TriangleAlert } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState, type CSSProperties } from "react";
 import type { Service, ServerStatus } from "@/lib/vpnApi";
 import { ServiceIcon } from "@/components/ServiceIcon";
 import { AccountForm } from "@/components/AccountForm";
+import { DurationCards } from "@/components/DurationCards";
+import { PathLoader } from "@/components/PathLoader";
+import { QuotaCountdown } from "@/components/QuotaCountdown";
 import { ServerDirectory } from "@/components/ServerDirectory";
 import { ServerServices } from "@/components/ServerServices";
+import { useMeta } from "@/components/useMeta";
+import { quotaForDuration, type QuotaEntry, type QuotaMap } from "@/components/quota";
+
+// Token visual (didefinisikan worker tokens di src/styles/tokens.css); fallback
+// di sini menjaga tampilan tetap waras bila token belum terisi.
+const heroHeadingStyle: CSSProperties = {
+  fontFamily: "var(--font-sans, 'Plus Jakarta Sans', system-ui, sans-serif)",
+  fontWeight: 800,
+  letterSpacing: "-0.02em",
+};
+
+const sectionHeadingStyle: CSSProperties = {
+  fontFamily: "var(--font-sans, 'Plus Jakarta Sans', system-ui, sans-serif)",
+  fontWeight: 800,
+  letterSpacing: "-0.015em",
+};
+
+const quotaBoxStyle: CSSProperties = {
+  background: "var(--surface-tint, #eaf3f8)",
+  border: "1px solid color-mix(in srgb, var(--primary, #0866b5) 28%, transparent)",
+  borderRadius: "var(--radius, 12px)",
+  padding: "1rem 1.15rem",
+};
 
 export type Meta = {
   services: Service[];
@@ -17,9 +43,10 @@ export type Meta = {
   status: ServerStatus | null;
   statusFetchedAt?: number;
   serverNow?: string;
-  quota: Record<string, { used: number; limit: number; remaining: number; resetsAt: string }>;
+  quota: QuotaMap;
   quotaUnavailable?: boolean;
   unavailable: boolean;
+  stale?: boolean;
   allowed_days: Array<1 | 3 | 7>;
   support_url?: string;
   turnstile_site_key?: string;
@@ -28,82 +55,85 @@ export type Meta = {
   pausedServices?: string[];
 };
 
-function countdown(iso?: string, now?: number): string | null {
-  if (!iso || now === undefined || !Number.isFinite(now)) return null;
-  const seconds = Math.max(0, Math.floor((Date.parse(iso) - now) / 1000));
-  return `${String(Math.floor(seconds / 3600)).padStart(2, "0")}:${String(Math.floor((seconds % 3600) / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
+function NoticeBanner({ meta }: { meta: Meta }) {
+  if (meta.siteMode !== "notice" || !meta.siteMessage) return null;
+  return (
+    <p className="notice" role="status">
+      {meta.siteMessage}
+    </p>
+  );
 }
 
-function ageLabel(fetchedAt: number): string {
-  const seconds = Math.max(0, Math.floor((Date.now() - fetchedAt) / 1000));
-  if (seconds < 60) return "kurang dari semenit lalu";
-  const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes} menit lalu`;
-  return `${Math.floor(minutes / 60)} jam lalu`;
+function LoadingPanel({ label }: { label: string }) {
+  return (
+    <div className="panel loading-panel" role="status">
+      <PathLoader size="md" label={label} />
+      <p>{label}...</p>
+    </div>
+  );
 }
 
-function serviceState(status: ServerStatus, id: string, stale: boolean): string {
-  const value = status.services?.[id];
-  const prefix = stale ? "Terakhir diketahui " : "";
-  if (value === true || value === "running") return `${prefix}aktif`;
-  if (value === false || value === "stopped") return `${prefix}berhenti`;
-  return "Belum ada data";
+function MetaErrorPanel({ onRetry }: { onRetry: () => void }) {
+  return (
+    <div className="panel" role="alert">
+      <h2>Data tidak dapat dimuat</h2>
+      <p>
+        Koneksi ke server portal terputus. Periksa koneksi internet Anda lalu coba lagi. Akun yang
+        sudah dibuat sebelumnya tidak terpengaruh.
+      </p>
+      <button className="button-primary" type="button" onClick={onRetry}>
+        Coba lagi
+      </button>
+    </div>
+  );
 }
 
-export function Portal({
-  initial,
-  serviceId,
-  serverId,
-}: {
-  initial: Meta;
-  serviceId?: string;
-  serverId?: string;
-}) {
-  const meta = initial;
-  const [tick, setTick] = useState<number | null>(null);
-  const siteMode = initial.siteMode;
+function SiteStatePanel({ meta }: { meta: Meta }) {
+  const closed = meta.siteMode === "closed";
+  return (
+    <section className="recovery-page" aria-labelledby="site-state-title">
+      <svg className="broken-path" viewBox="0 0 240 60" aria-hidden="true">
+        <path d="M8 30h72m18 0h134M80 22l8 8-8 8m18-16-8 8 8 8" />
+        <circle cx="8" cy="30" r="4" />
+        <circle cx="232" cy="30" r="4" />
+      </svg>
+      <p className="eyebrow">PORTAL AKUN VPN</p>
+      <h1 id="site-state-title" style={heroHeadingStyle}>
+        {closed ? "Portal ditutup" : "Portal sedang dirawat"}
+      </h1>
+      <p>
+        {meta.siteMessage ||
+          (closed
+            ? "Layanan portal ini telah ditutup."
+            : "Pembuatan akun sedang dihentikan sementara.")}
+      </p>
+      <p className="muted">Muat ulang halaman untuk memeriksa status terbaru.</p>
+    </section>
+  );
+}
 
-  useEffect(() => {
-    setTick(Date.now());
-    const timer = window.setInterval(() => setTick(Date.now()), 1000);
-    return () => window.clearInterval(timer);
-  }, []);
-
+function ServiceView({ meta, serviceId }: { meta: Meta; serviceId: string }) {
+  const days: Array<1 | 3 | 7> = meta.allowed_days.length > 0 ? meta.allowed_days : [1, 3, 7];
+  const [day, setDay] = useState<1 | 3 | 7>(days[0] ?? 1);
   const selected = meta.services.find((service) => service.id === serviceId);
-  const quota = serviceId ? meta.quota[serviceId] : undefined;
   const catalogUnavailable = meta.catalogUnavailable ?? meta.unavailable;
-  const statusUnavailable = meta.statusUnavailable ?? meta.unavailable;
-  const now = tick ?? Date.parse(meta.serverNow ?? "");
+  const paused = meta.pausedServices?.includes(serviceId) ?? false;
+  const quota: QuotaEntry | undefined = quotaForDuration(meta.quota, serviceId, day);
 
-  if (!serviceId) {
-    if (serverId) return <ServerServices meta={meta} serverId={serverId} />;
-    return <ServerDirectory meta={meta} />;
-  }
-
-  if (siteMode === "maintenance" || siteMode === "closed") {
+  if (!selected && meta.services.length > 0) {
     return (
-      <section className="recovery-page" aria-labelledby="site-state-title">
-        <svg className="broken-path" viewBox="0 0 240 60" aria-hidden="true">
-          <path d="M8 30h72m18 0h134M80 22l8 8-8 8m18-16-8 8 8 8" />
-          <circle cx="8" cy="30" r="4" />
-          <circle cx="232" cy="30" r="4" />
-        </svg>
-        <p className="eyebrow">Portal akun VPN</p>
-        <h1 id="site-state-title">
-          {siteMode === "closed" ? "Portal ditutup" : "Portal sedang dirawat"}
-        </h1>
-        <p>
-          {meta.siteMessage ||
-            (siteMode === "closed"
-              ? "Layanan portal ini telah ditutup."
-              : "Pembuatan akun sedang dihentikan sementara.")}
-        </p>
-        <p className="muted">Muat ulang halaman untuk memeriksa status terbaru.</p>
+      <section className="recovery-page" aria-labelledby="service-missing-title">
+        <p className="eyebrow">Layanan VPN</p>
+        <h1 id="service-missing-title">Layanan tidak tersedia</h1>
+        <p>Layanan {serviceId} tidak ada di daftar server saat ini.</p>
+        <Link className="button-primary recovery-home" href="/">
+          Kembali ke beranda
+        </Link>
       </section>
     );
   }
 
-  if (serviceId) {
+  if (!selected?.available || catalogUnavailable || paused) {
     return (
       <section className="service-page" aria-labelledby="service-title">
         <div className="service-heading">
@@ -113,299 +143,143 @@ export function Portal({
           <div>
             <p className="eyebrow">Layanan VPN</p>
             <h1 id="service-title">{selected?.service_label ?? selected?.label ?? serviceId}</h1>
-            {selected?.server_label ? (
-              <p className="service-server-label">
-                Server:{" "}
-                {selected.server_id ? (
-                  <Link href={`/server/${encodeURIComponent(selected.server_id)}`}>
-                    {selected.server_label}
-                  </Link>
-                ) : (
-                  selected.server_label
-                )}
-              </p>
-            ) : null}
-            <p>
-              {selected?.available
-                ? "Pilih durasi, lalu simpan detail koneksi sebelum meninggalkan halaman."
-                : selected?.reason || "Layanan sedang tidak tersedia."}
-            </p>
           </div>
         </div>
-        {selected?.available && !catalogUnavailable ? (
-          <section className="panel service-account-panel">
-            <div className="quota-summary-inline">
-              <h2>Kuota hari ini</h2>
-              {quota ? (
-                <>
-                  <p className="quota-number">
-                    {quota.used}
-                    <span>/{quota.limit} terpakai</span>
-                  </p>
-                  <progress value={quota.used} max={quota.limit} aria-label="Kuota terpakai" />
-                  <p>Sisa {quota.remaining} akun</p>
-                  <p className="muted">
-                    <Clock3 size={16} aria-hidden="true" /> Reset 00.00 WIB
-                    {countdown(quota.resetsAt, now)
-                      ? `, dalam ${countdown(quota.resetsAt, now)}`
-                      : ", waktu reset belum tersedia"}
-                  </p>
-                </>
-              ) : (
-                <p role="status">Kuota belum dapat dimuat.</p>
-              )}
-            </div>
-            <AccountForm
-              embedded
-              service={selected}
-              days={meta.allowed_days}
-              quota={quota}
-              quotaUnavailable={meta.quotaUnavailable || !quota}
-              turnstileSiteKey={meta.turnstile_site_key}
-            />
-          </section>
-        ) : (
-          <div className="panel unavailable" role="status">
-            <TriangleAlert aria-hidden="true" />
-            <h2>
-              {catalogUnavailable
-                ? "Server sedang tidak dapat dihubungi"
+        <NoticeBanner meta={meta} />
+        <div className="panel unavailable" role="status">
+          <TriangleAlert aria-hidden="true" />
+          <h2>
+            {catalogUnavailable
+              ? "Server sedang tidak dapat dihubungi"
+              : paused
+                ? "Pembuatan akun dijeda"
                 : "Layanan tidak tersedia"}
-            </h2>
-            <p>
-              {catalogUnavailable
-                ? "Daftar layanan belum dapat diperbarui. Coba lagi beberapa saat."
+          </h2>
+          <p>
+            {catalogUnavailable
+              ? "Daftar layanan belum dapat diperbarui. Coba lagi beberapa saat."
+              : paused
+                ? "Admin menjeda pembuatan akun untuk layanan ini sementara waktu."
                 : selected?.reason || "Coba lagi nanti."}
-            </p>
-            {catalogUnavailable ? (
-              <button
-                className="button-secondary"
-                type="button"
-                onClick={() => window.location.reload()}
-              >
-                Coba lagi
-              </button>
-            ) : null}
-          </div>
-        )}
+          </p>
+          {catalogUnavailable ? (
+            <button
+              className="button-secondary"
+              type="button"
+              onClick={() => window.location.reload()}
+            >
+              Coba lagi
+            </button>
+          ) : null}
+        </div>
       </section>
     );
   }
 
-  const status = meta.status;
-  const ram = status?.server?.ram as { used_mb?: number; total_mb?: number } | undefined;
-  const uptime =
-    typeof status?.server?.uptime_seconds === "number"
-      ? `${Math.floor(status.server.uptime_seconds / 3600)} jam`
-      : "Belum ada data";
+  return (
+    <section className="service-page" aria-labelledby="service-title">
+      <div className="service-heading">
+        <span className="service-icon">
+          <ServiceIcon id={serviceId} />
+        </span>
+        <div>
+          <p className="eyebrow">Layanan VPN</p>
+          <h1 id="service-title">{selected.service_label ?? selected.label}</h1>
+          {selected.server_label ? (
+            <p className="service-server-label">
+              Server:{" "}
+              {selected.server_id ? (
+                <Link href={`/server/${encodeURIComponent(selected.server_id)}`}>
+                  {selected.server_label}
+                </Link>
+              ) : (
+                selected.server_label
+              )}
+            </p>
+          ) : null}
+          <p>Pilih durasi, buat akun, lalu simpan detail koneksi sebelum meninggalkan halaman.</p>
+        </div>
+      </div>
+      <NoticeBanner meta={meta} />
+      <DurationCards days={days} selected={day} onSelect={setDay} meta={meta} serviceId={serviceId} />
+      <section className="panel service-account-panel" aria-label="Buat akun">
+        <div className="quota-summary-inline" style={quotaBoxStyle}>
+          <h2 style={sectionHeadingStyle}>Kuota hari ini</h2>
+          {quota ? (
+            <>
+              <p className="quota-number">
+                {quota.used}
+                <span>/{quota.limit} terpakai</span>
+              </p>
+              <progress value={quota.used} max={quota.limit} aria-label="Kuota terpakai" />
+              <p>
+                Sisa {quota.remaining} akun {day} hari
+              </p>
+              <p className="muted">
+                <Clock3 size={16} aria-hidden="true" /> <QuotaCountdown resetsAt={quota.resetsAt} />
+              </p>
+            </>
+          ) : (
+            <p role="status">Kuota belum dapat dimuat.</p>
+          )}
+        </div>
+        <AccountForm
+          service={selected}
+          day={day}
+          quota={quota}
+          quotaUnavailable={meta.quotaUnavailable || !quota}
+          turnstileSiteKey={meta.turnstile_site_key}
+        />
+      </section>
+    </section>
+  );
+}
+
+export function Portal({ serviceId, serverId }: { serviceId?: string; serverId?: string }) {
+  const { meta, failed, retry } = useMeta();
+
+  if (failed) {
+    return <MetaErrorPanel onRetry={retry} />;
+  }
+  if (meta === null) {
+    if (serviceId) {
+      return (
+        <section className="service-page" aria-label="Memuat">
+          <LoadingPanel label="Memuat data layanan" />
+        </section>
+      );
+    }
+    if (serverId) {
+      return (
+        <section className="server-page" aria-label="Memuat">
+          <LoadingPanel label="Memuat data server" />
+        </section>
+      );
+    }
+    return <LoadingPanel label="Memuat data portal" />;
+  }
+
+  if (meta.siteMode === "maintenance" || meta.siteMode === "closed") {
+    return <SiteStatePanel meta={meta} />;
+  }
+
+  if (serverId) {
+    return (
+      <>
+        <NoticeBanner meta={meta} />
+        <ServerServices meta={meta} serverId={serverId} />
+      </>
+    );
+  }
+
+  if (serviceId) {
+    return <ServiceView meta={meta} serviceId={serviceId} />;
+  }
+
   return (
     <>
-      <section className="portal-intro" aria-labelledby="home-title">
-        <p className="eyebrow">Portal akun VPN</p>
-        <h1 id="home-title">Pilih layanan, buat akun, simpan detail koneksi.</h1>
-        <p>
-          Pilih durasi {meta.allowed_days.map((day) => `${day} hari`).join(", ")}. Detail akun
-          ditampilkan di tab ini agar dapat Anda salin sebelum menutup halaman.
-        </p>
-      </section>
-      {meta.unavailable ? (
-        <p className="notice" role="status">
-          <TriangleAlert aria-hidden="true" /> Sebagian data belum dapat diperbarui.
-          {meta.catalogUnavailable && meta.catalogFetchedAt
-            ? ` Daftar layanan terakhir diperbarui ${ageLabel(meta.catalogFetchedAt)}.`
-            : ""}
-          {statusUnavailable && meta.statusFetchedAt
-            ? ` Status server terakhir diperbarui ${ageLabel(meta.statusFetchedAt)}.`
-            : ""}
-        </p>
-      ) : null}
-      {siteMode === "notice" && meta.siteMessage ? (
-        <p className="notice" role="status">
-          {meta.siteMessage}
-        </p>
-      ) : null}
-
-      <section className="service-list-section" aria-labelledby="services-title">
-        <h2 id="services-title">Pilih layanan</h2>
-        {meta.services.length ? (
-          <ul className="service-list">
-            {meta.services.map((service) => {
-              const itemQuota = meta.quota[service.id];
-              return (
-                <li className="service-list__row" key={service.id}>
-                  <span className="service-list__icon">
-                    <ServiceIcon id={service.id} size={22} />
-                  </span>
-                  <div className="service-list__details">
-                    <h3>{service.label}</h3>
-                    <p>
-                      {meta.pausedServices?.includes(service.id)
-                        ? "Pembuatan akun dijeda"
-                        : catalogUnavailable
-                          ? `Status terakhir diketahui ${service.available ? "tersedia" : "tidak tersedia"}`
-                          : service.available
-                            ? "Tersedia"
-                            : service.reason || "Layanan tidak tersedia"}
-                    </p>
-                    <p>
-                      {itemQuota
-                        ? `Sisa kuota hari ini ${itemQuota.remaining} dari ${itemQuota.limit}`
-                        : "Kuota hari ini belum tersedia"}
-                    </p>
-                  </div>
-                  <Link
-                    className="service-list__action"
-                    href={`/s/${encodeURIComponent(service.id)}`}
-                  >
-                    {service.available && !meta.pausedServices?.includes(service.id)
-                      ? `Buat akun ${service.label}`
-                      : `Lihat ${service.label}`}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        ) : (
-          <p className="panel" role="status">
-            {catalogUnavailable
-              ? "Daftar layanan belum dapat dimuat. Coba lagi beberapa saat."
-              : "Belum ada layanan yang tersedia."}
-          </p>
-        )}
-      </section>
-
-      <section className="status-section" aria-labelledby="status-title">
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">Data layanan</p>
-            <h2 id="status-title">Status Server</h2>
-          </div>
-          <p className="muted">
-            {statusUnavailable
-              ? meta.statusFetchedAt
-                ? `Data terakhir ${ageLabel(meta.statusFetchedAt)}`
-                : "Status belum tersedia"
-              : "Data terbaru"}
-          </p>
-        </div>
-        {status ? (
-          <>
-            {status.servers?.length ? (
-              <ul className="server-status-list" aria-label="Status setiap server">
-                {status.servers.map((server) => (
-                  <li key={String(server.id)}>
-                    <strong>{String(server.label ?? server.id)}</strong>
-                    <span>
-                      Uptime{" "}
-                      {typeof server.uptime_seconds === "number"
-                        ? `${Math.floor(server.uptime_seconds / 3600)} jam`
-                        : "Belum ada data"}
-                    </span>
-                    <span>
-                      RAM{" "}
-                      {typeof (server.ram as { used_mb?: unknown } | undefined)?.used_mb ===
-                        "number" &&
-                      typeof (server.ram as { total_mb?: unknown } | undefined)?.total_mb ===
-                        "number"
-                        ? `${(server.ram as { used_mb: number }).used_mb} / ${(server.ram as { total_mb: number }).total_mb} MB`
-                        : "Belum ada data"}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            ) : null}
-            {!status.servers?.length ? (
-              <dl className="status-metrics">
-                <div>
-                  <dt>Uptime</dt>
-                  <dd>{uptime}</dd>
-                </div>
-                <div>
-                  <dt>RAM</dt>
-                  <dd>
-                    {typeof ram?.used_mb === "number" && typeof ram.total_mb === "number"
-                      ? `${ram.used_mb} / ${ram.total_mb} MB`
-                      : "Belum ada data"}
-                  </dd>
-                </div>
-              </dl>
-            ) : null}
-            <div className="status-table-wrap">
-              <table className="status-table">
-                <caption>Jumlah akun dan status setiap layanan</caption>
-                <thead>
-                  <tr>
-                    <th scope="col">Layanan</th>
-                    <th scope="col">Jumlah akun</th>
-                    <th scope="col">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {meta.services.map((service) => (
-                    <tr key={service.id}>
-                      <th scope="row">{service.label}</th>
-                      <td>
-                        {typeof status.accounts?.[service.id] === "number"
-                          ? status.accounts[service.id]
-                          : "Belum ada data"}
-                      </td>
-                      <td>
-                        {statusUnavailable
-                          ? serviceState(status, service.id, true)
-                          : serviceState(status, service.id, false)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </>
-        ) : (
-          <p className="panel" role="status">
-            Status server belum dapat dimuat.
-          </p>
-        )}
-      </section>
-
-      <section className="quota-strip" aria-labelledby="quota-title">
-        <h2 id="quota-title">Kuota hari ini</h2>
-        {meta.services.length ? (
-          <ul>
-            {meta.services.map((service) => {
-              const itemQuota = meta.quota[service.id];
-              const remaining = itemQuota ? countdown(itemQuota.resetsAt, now) : null;
-              return (
-                <li key={service.id}>
-                  <span>{service.label}</span>
-                  <strong>
-                    {itemQuota ? `${itemQuota.used} / ${itemQuota.limit}` : "Belum tersedia"}
-                  </strong>
-                  <small>
-                    {itemQuota
-                      ? `Reset 00.00 WIB${remaining ? `, dalam ${remaining}` : ""}`
-                      : "Kuota belum dapat dimuat"}
-                  </small>
-                </li>
-              );
-            })}
-          </ul>
-        ) : (
-          <p role="status">Kuota belum tersedia.</p>
-        )}
-      </section>
-
-      {meta.support_url ? (
-        <aside className="support-card">
-          <h2>Dukungan</h2>
-          <p>Informasi dukungan tersedia bila Anda memerlukannya.</p>
-          <a href={meta.support_url} rel="noreferrer">
-            Informasi dukungan
-          </a>
-        </aside>
-      ) : null}
-      <span className="sr-only" aria-live="polite">
-        {tick !== null ? "Status waktu diperbarui" : ""}
-      </span>
+      <NoticeBanner meta={meta} />
+      <ServerDirectory meta={meta} />
     </>
   );
 }
