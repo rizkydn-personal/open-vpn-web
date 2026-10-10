@@ -27,6 +27,10 @@ Tuning dials: Density 6, Motion 2, Variance 3. Alasan satu baris: portal padat d
 - Hitung mundur kuota diisolasi ke komponen QuotaCountdown: interval 1 detik tidak me-render ulang seluruh halaman. Alasan: menghemat CPU/baterai ponsel.
 - 211 baris JSX mati + ~200 baris CSS mati dihapus setelah verifikasi grep tidak ada import. Alasan: kode mati adalah sumber bug dan kebingungan.
 - Restyle rasa 2026-10-10 (7 worker paralel): token → warm off-white #F7F8F8, primary #0866b5, Plus Jakarta Sans, radius 12/20/pill, border 1px subtle, shadow lembut. Struktur/alur/fitur tidak berubah. Alasan: pemilik menilai hasil revamp "masih ai slop" dan mengirim 3 web miliknya sebagai referensi selera; analisis CSS asli ketiga web didistilasi ke notes/TASTE.md dan diterapkan.
+- Detail pass 2026-10-10: `--font-sans` now starts with `var(--font-jakarta)` from next/font; before, CSS named "Plus Jakarta Sans" literally, which never matches the font next/font self-hosts, so pages rendered in the system font. Alasan: font yang dimuat harus benar-benar terpakai.
+- Uptime ditampilkan sebagai "3 hari 4 jam" atau "42 menit" lewat `formatUptime`, bukan jam bulat ("0 jam" untuk server baru menyala). Alasan: angka harus terbaca benar dari API.
+- Baris "Batas sesi bersamaan" hanya tampil bila API mengirim `max_sessions`; nilai bawaan "1" dihapus. Alasan: tidak ada angka tanpa sumber.
+- Loader yang berada di dalam elemen `role="status"` atau tombol dibuat dekoratif (`decorative`), jadi pembaca layar mengumumkan satu kali. Alasan: sebelumnya teks yang sama diumumkan tiga kali.
 
 ## Visual system (arah rasa 2026-10-10, dari 3 web milik pemilik — lihat notes/TASTE.md)
 

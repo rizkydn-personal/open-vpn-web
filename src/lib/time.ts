@@ -31,6 +31,19 @@ export function formatWib(iso: string | Date): string {
   }).format(date)} WIB`;
 }
 
+/** Human-readable uptime, e.g. "42 menit", "5 jam 12 menit", "3 hari 4 jam". Returns null for invalid input. */
+export function formatUptime(totalSeconds: number): string | null {
+  if (!Number.isFinite(totalSeconds) || totalSeconds < 0) return null;
+  const minutes = Math.floor(totalSeconds / 60);
+  if (minutes < 1) return "kurang dari 1 menit";
+  const days = Math.floor(minutes / 1440);
+  const hours = Math.floor((minutes % 1440) / 60);
+  const mins = minutes % 60;
+  if (days > 0) return hours > 0 ? `${days} hari ${hours} jam` : `${days} hari`;
+  if (hours > 0) return mins > 0 ? `${hours} jam ${mins} menit` : `${hours} jam`;
+  return `${mins} menit`;
+}
+
 export function countdownToReset(now: Date): { hours: number; minutes: number; seconds: number } {
   const remaining = Math.max(0, nextResetAt(now).getTime() - now.getTime());
   const seconds = Math.floor(remaining / 1000);

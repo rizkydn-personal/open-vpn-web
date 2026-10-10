@@ -16,7 +16,8 @@
   --radius-lg: 20px;
   --radius-pill: 999px;
   --shadow-soft: 0 24px 80px rgb(24 51 69 / 0.12);
-  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  /* --font-jakarta is injected by next/font in layout.tsx; the literal family name is a local fallback. */
+  --font-sans: var(--font-jakarta), "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
   /* Dipakai kode yang ada (jaga kompatibilitas). */
   --sky-tint: color-mix(in srgb, var(--sky) 12%, #fff);
 }

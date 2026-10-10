@@ -4,10 +4,7 @@ import type { CSSProperties } from "react";
 import type { Meta } from "@/components/Portal";
 import { quotaForDuration } from "@/components/quota";
 
-function quotaLabel(
-  quota: ReturnType<typeof quotaForDuration>,
-  quotaUnavailable: boolean,
-): string {
+function quotaLabel(quota: ReturnType<typeof quotaForDuration>, quotaUnavailable: boolean): string {
   if (quotaUnavailable || !quota) return "Kuota belum tersedia";
   if (quota.remaining <= 0) return "Kuota hari ini habis";
   return `Sisa ${quota.remaining} dari ${quota.limit}`;
@@ -18,14 +15,12 @@ const cardBase: CSSProperties = {
   border: "1px solid var(--line)",
   borderRadius: "var(--radius-lg)",
   padding: "1rem",
-  transition:
-    "border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.2s ease",
+  transition: "border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.2s ease",
 };
 
 const cardActive: CSSProperties = {
   border: "2px solid var(--primary)",
-  background:
-    "color-mix(in srgb, var(--primary) 8%, var(--surface))",
+  background: "color-mix(in srgb, var(--primary) 8%, var(--surface))",
   boxShadow: "var(--shadow-soft)",
   // 2px border diganti dengan 1px padding supaya ukuran kartu tetap sama
   padding: "calc(1rem - 1px)",
@@ -68,7 +63,7 @@ export function DurationCards({
   const quotaUnavailable = meta.quotaUnavailable ?? false;
   return (
     <fieldset className="duration-cards">
-      <legend>Pilih durasi akunmu</legend>
+      <legend>Pilih durasi akun</legend>
       <div className="duration-cards__grid">
         {days.map((day) => {
           const quota = quotaForDuration(meta.quota, serviceId, day);

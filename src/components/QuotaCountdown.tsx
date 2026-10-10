@@ -36,7 +36,12 @@ export function QuotaCountdown({ resetsAt }: { resetsAt?: string }) {
       }}
     >
       Reset 00.00 WIB
-      {remaining ? `, tersisa ${remaining}` : ", waktunya belum bisa dipastikan"}
+      {/* Before mount (now === null) only the fixed part shows, so no placeholder text flashes. */}
+      {remaining
+        ? `, tersisa ${remaining}`
+        : now !== null
+          ? ", waktunya belum bisa dipastikan"
+          : ""}
     </span>
   );
 }

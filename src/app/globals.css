@@ -1343,3 +1343,152 @@ progress::-moz-progress-bar {
     animation: none;
   }
 }
+
+/* Account result card (moved from an inline <style> in AccountForm). */
+.result-card.result-card--polish {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+  padding: clamp(1.25rem, 4vw, 2rem);
+}
+.result-card--polish > h2 {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 0 0 1rem;
+}
+.result-once.result-once--polish {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  background: var(--warm-tint);
+  border: 1px solid var(--warm);
+  border-radius: var(--radius);
+  padding: 0.75rem 1rem;
+  font-size: 0.92rem;
+  color: var(--ink);
+}
+.result-once--polish > svg {
+  flex: none;
+  margin-top: 0.2rem;
+}
+.account-facts.account-facts--polish dt {
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+.account-facts.account-facts--polish dd {
+  color: var(--ink);
+  font-weight: 600;
+}
+.technical-value.technical-value--box {
+  display: inline-block;
+  background: var(--surface-tint);
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  padding: 0.3rem 0.65rem;
+  color: var(--ink);
+}
+.payload-block.payload-block--polish {
+  background: var(--surface-tint);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.payload-block--polish h3 {
+  font-family: var(--font-sans);
+  color: var(--ink);
+}
+.copy-button.copy-button--pill {
+  border-radius: var(--radius-pill);
+  min-height: 0;
+  padding: 0.35rem 0.8rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.copy-button.copy-button--pill:hover {
+  border-color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+}
+.copy-button.copy-button--pill:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+.result-actions__lead .copy-button.copy-button--pill {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+.result-actions__lead .copy-button.copy-button--pill:hover {
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
+}
+
+/* Larger touch target for copy and download buttons on touch screens. */
+@media (pointer: coarse) {
+  .copy-button.copy-button--pill {
+    min-height: 2.75rem;
+    min-width: 2.75rem;
+  }
+}
+
+/* Server service list (moved from an inline <style> in ServerServices). */
+.server-services-restyle .server-service-list > li {
+  background: var(--surface, #ffffff);
+  padding: 0.85rem 0.75rem;
+  transition: background-color 0.15s ease;
+}
+.server-services-restyle .server-service-list > li:hover {
+  background: var(--surface-tint, #eaf3f8);
+}
+.server-services-restyle .service-list__icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius, 12px);
+  background: color-mix(in srgb, var(--primary, #0866b5) 10%, var(--surface, #ffffff));
+  border: 1px solid color-mix(in srgb, var(--primary, #0866b5) 18%, transparent);
+  color: var(--primary, #0866b5);
+}
+.server-services-restyle .service-list__details {
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+.server-services-restyle .service-list__details h2 {
+  color: var(--ink, #183345);
+}
+.server-services-restyle .service-list__action {
+  border-radius: var(--radius-pill, 999px);
+  background: var(--primary, #0866b5);
+  border-color: var(--primary, #0866b5);
+  color: #ffffff;
+  padding: 0.5rem 1.15rem;
+}
+.server-services-restyle .service-list__action:hover {
+  background: color-mix(in srgb, var(--primary, #0866b5) 88%, #000000);
+  border-color: color-mix(in srgb, var(--primary, #0866b5) 88%, #000000);
+  color: #ffffff;
+}
+.server-services-restyle .service-list__action--off {
+  background: transparent;
+  border-color: var(--line, #dfe5ea);
+  border-style: dashed;
+  color: var(--muted, #526573);
+}
+.server-services-restyle .service-list__action--off:hover {
+  background: var(--surface-tint, #eaf3f8);
+  border-color: var(--muted, #526573);
+  color: var(--ink, #183345);
+}
+.server-services-restyle .eyebrow::before {
+  background: var(--warm, #f2c438);
+}
+.server-services-restyle .notice {
+  border-radius: var(--radius, 12px);
+  background: color-mix(in srgb, var(--warm, #f2c438) 14%, var(--surface, #ffffff));
+  border: 1px solid color-mix(in srgb, var(--warm, #f2c438) 55%, var(--line, #dfe5ea));
+  border-left: 4px solid var(--warm, #f2c438);
+}
