@@ -44,17 +44,17 @@ const noteStyle: CSSProperties = {
 };
 
 const protocolDetails: Record<string, string> = {
-  ssh: "Hasilnya host, port, username, dan kata sandi untuk dimasukkan ke aplikasi tunnel SSH.",
+  ssh: "Gunakan host, port, username, dan password ini di aplikasi SSH tunneling.",
   vmess:
-    "Protokol Xray. Hasilnya tautan koneksi (biasanya diawali vmess://) untuk diimpor ke aplikasi klien yang mendukung VMess.",
+    "Xray protocol. Import connection link (biasanya diawali vmess://) ke aplikasi client yang mendukung VMess.",
   vless:
-    "Protokol Xray. Hasilnya tautan koneksi (biasanya diawali vless://) untuk diimpor ke aplikasi klien yang mendukung VLESS.",
+    "Xray protocol. Import connection link (biasanya diawali vless://) ke aplikasi client yang mendukung VLESS.",
   trojan:
-    "Protokol Xray. Hasilnya tautan koneksi (biasanya diawali trojan://) untuk diimpor ke aplikasi klien yang mendukung Trojan.",
+    "Xray protocol. Import connection link (biasanya diawali trojan://) ke aplikasi client yang mendukung Trojan.",
   "ovpn-tcp":
-    "OpenVPN lewat TCP. Bila server menyediakan berkas .ovpn, unduh lalu impor ke aplikasi OpenVPN.",
+    "OpenVPN melalui TCP. Jika tersedia file .ovpn, download lalu impor ke aplikasi OpenVPN.",
   "ovpn-udp":
-    "OpenVPN lewat UDP. Bila server menyediakan berkas .ovpn, unduh lalu impor ke aplikasi OpenVPN.",
+    "OpenVPN melalui UDP. Jika tersedia file .ovpn, download lalu impor ke aplikasi OpenVPN.",
 };
 
 function listDays(days: number[]): string {
@@ -81,26 +81,24 @@ export function ServerDirectory({ meta }: { meta: Meta }) {
       <header className="server-directory__hero">
         <p className="eyebrow">PORTAL AKUN VPN</p>
         <h1 id="server-directory-title" style={heroHeadingStyle}>
-          Buat akun VPN gratis untuk {listDays(meta.allowed_days)}.
+          Buat akun VPN gratis untuk {listDays(meta.allowed_days)}
         </h1>
         <p className="server-directory__intro">
-          Pilih server dan protokol yang paling cocok, buat akunnya, lalu salin detail koneksi.
-          Detailnya hanya tersimpan di tab ini selama 30 menit, jadi jangan sampai terlewat.
+          Pilih server dan service, lalu create akun dan simpan connection details. Data akun tersedia di tab ini selama 30 menit.
         </p>
       </header>
       {meta.unavailable ? (
         <p className="notice" role="status">
-          Sebagian data server belum dapat diperbarui.{" "}
-          {meta.statusFetchedAt
-            ? `Status terakhir diperbarui ${formatWib(new Date(meta.statusFetchedAt))}.`
-            : ""}
+          Sebagian data server gagal diperbarui. {meta.statusFetchedAt ? `Last update ${formatWib(new Date(meta.statusFetchedAt))}.` : ""}
         </p>
       ) : null}
       <div className="server-directory__selection">
         <h2 id="server-selection-title" style={sectionHeadingStyle}>
           Pilih server
         </h2>
-        <p>Buka satu server untuk melihat status tiap protokol dan sisa kuota hari ini.</p>
+        <p>
+          Pilih server untuk melihat status service dan sisa quota hari ini.
+        </p>
       </div>
       {servers.length ? (
         <ul className="server-card-list">
@@ -126,13 +124,13 @@ export function ServerDirectory({ meta }: { meta: Meta }) {
                     </span>
                     <span className="server-card__title">
                       <strong>{server.label}</strong>
-                      {location ? <span>{location}</span> : null}
+                      {location ? <span>Location: {location}</span> : null}
                     </span>
                     <ArrowRight className="server-card__arrow" aria-hidden="true" />
                   </span>
                   <ServerStatusBadge health={health} available={available} />
                   <span className="server-card__block">
-                    <span className="server-card__label">Protokol</span>
+                      <span className="server-card__label">Service</span>
                     <span className="chip-list">
                       {server.services.map((service) => (
                         <span
@@ -142,7 +140,7 @@ export function ServerDirectory({ meta }: { meta: Meta }) {
                         >
                           {service.service_label ?? service.label}
                           {service.available ? null : (
-                            <span className="sr-only"> (tidak tersedia)</span>
+                            <span className="sr-only"> (unavailable)</span>
                           )}
                         </span>
                       ))}
@@ -151,12 +149,12 @@ export function ServerDirectory({ meta }: { meta: Meta }) {
                   <span className="server-card__stats">
                     <span className="stat-tile">
                       <span className="server-card__label">
-                        {server.capacity ? "Kapasitas" : "Akun tercatat"}
+                        {server.capacity ? "Capacity" : "Akun tercatat"}
                       </span>
                       <strong>
-                        <Users size={18} aria-hidden="true" />
+                        <Users size={15} aria-hidden="true" />
                         {accounts === null
-                          ? "Belum ada data"
+                          ? "Data belum tersedia"
                           : server.capacity
                             ? `${accounts} / ${server.capacity}`
                             : accounts}
@@ -166,7 +164,7 @@ export function ServerDirectory({ meta }: { meta: Meta }) {
                       <span className="stat-tile">
                         <span className="server-card__label">Bandwidth</span>
                         <strong>
-                          <Gauge size={18} aria-hidden="true" />
+                          <Gauge size={15} aria-hidden="true" />
                           {server.bandwidth}
                         </strong>
                       </span>
@@ -175,7 +173,7 @@ export function ServerDirectory({ meta }: { meta: Meta }) {
                       <span className="server-card__label">Uptime</span>
                       <strong>
                         {(typeof uptime === "number" ? formatUptime(uptime) : null) ??
-                          "Belum ada data"}
+                          "Data belum tersedia"}
                       </strong>
                     </span>
                   </span>
@@ -186,7 +184,7 @@ export function ServerDirectory({ meta }: { meta: Meta }) {
         </ul>
       ) : (
         <p className="panel" role="status">
-          Daftar server belum dapat dimuat. Coba lagi beberapa saat.
+          Server list gagal dimuat. Coba lagi sebentar.
         </p>
       )}
 
@@ -201,22 +199,19 @@ export function ServerDirectory({ meta }: { meta: Meta }) {
           <li>
             <h3>Bandingkan server</h3>
             <p>
-              Kartu server menunjukkan lokasi, status, dan protokol. Online berarti server menjawab
-              pengecekan status terakhir. Uptime adalah lama server menyala.
+              Cek location, status, dan service pada setiap server. Status Online berarti server merespons pengecekan terakhir. Uptime menunjukkan lama server aktif.
             </p>
           </li>
           <li>
-            <h3>Pilih protokol dan durasi</h3>
+            <h3>Pilih service dan durasi</h3>
             <p>
-              Di halaman server, lihat status tiap protokol, jumlah akun, dan sisa kuota hari ini.
-              Lalu pilih durasi akun.
+              Cek status service dan sisa quota, lalu pilih durasi akun yang tersedia.
             </p>
           </li>
           <li>
-            <h3>Buat dan simpan akun</h3>
+            <h3>Create dan simpan akun</h3>
             <p>
-              Username dan kata sandi dibuat otomatis. Setelah akun jadi, salin detailnya atau unduh
-              berkas konfigurasi bila tersedia.
+              Username dan password dibuat otomatis. Setelah berhasil, copy detail akun atau download file konfigurasi jika tersedia.
             </p>
           </li>
         </ol>
@@ -224,11 +219,10 @@ export function ServerDirectory({ meta }: { meta: Meta }) {
         {protocols.length ? (
           <section className="protocol-guide" aria-labelledby="protocol-guide-title">
             <h2 id="protocol-guide-title" style={sectionHeadingStyle}>
-              Mengenal protokol
+              Mengenal protocol
             </h2>
             <p>
-              Tiap protokol memberi detail koneksi yang berbeda. Pakai persis yang tampil setelah
-              akun dibuat.
+              Setiap protocol punya format koneksi berbeda. Gunakan detail yang tampil setelah akun berhasil dibuat.
             </p>
             <ul className="protocol-guide__list">
               {protocols.map((service) => {
@@ -237,8 +231,7 @@ export function ServerDirectory({ meta }: { meta: Meta }) {
                   <li key={key}>
                     <h3>{service.service_label ?? service.label}</h3>
                     <p>
-                      {protocolDetails[key] ??
-                        "Detail koneksi untuk protokol ini tampil setelah akun dibuat."}
+                      {protocolDetails[key] ?? "Detail koneksi tersedia setelah akun berhasil dibuat."}
                     </p>
                   </li>
                 );
@@ -248,20 +241,18 @@ export function ServerDirectory({ meta }: { meta: Meta }) {
         ) : null}
 
         <aside className="portal-guide__note" style={noteStyle}>
-          <h2 style={sectionHeadingStyle}>Kuota dan penyimpanan detail</h2>
+          <h2 style={sectionHeadingStyle}>Quota dan detail akun</h2>
           <p>
-            Kuota dihitung per layanan dan kembali penuh setiap pukul 00.00 WIB. Detail akun
-            disimpan sementara di tab ini (session storage) selama paling lama 30 menit, jadi salin
-            atau unduh segera setelah akun dibuat.
+            Quota dihitung per service dan reset pukul 00.00 WIB. Detail akun tersimpan di tab ini hingga 30 menit. Segera copy atau download setelah akun dibuat.
           </p>
         </aside>
       </section>
       {meta.support_url ? (
         <aside className="support-card">
-          <h2 style={sectionHeadingStyle}>Dukungan</h2>
-          <p>Bingung memakai detail koneksi? Tim dukungan siap membantu lewat tautan berikut.</p>
+          <h2 style={sectionHeadingStyle}>Support</h2>
+          <p>Perlu bantuan menggunakan detail koneksi? Hubungi support melalui tautan berikut.</p>
           <a href={meta.support_url} rel="noreferrer">
-            Informasi dukungan
+            Hubungi support
           </a>
         </aside>
       ) : null}

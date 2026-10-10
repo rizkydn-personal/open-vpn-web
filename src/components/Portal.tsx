@@ -2,9 +2,8 @@
 
 import { Clock3, TriangleAlert } from "lucide-react";
 import Link from "next/link";
-import { useState, type CSSProperties } from "react";
+import { useState } from "react";
 import type { Service, ServerStatus } from "@/lib/vpnApi";
-import { ServiceIcon } from "@/components/ServiceIcon";
 import { AccountForm } from "@/components/AccountForm";
 import { DurationCards } from "@/components/DurationCards";
 import { PathLoader } from "@/components/PathLoader";
@@ -13,27 +12,6 @@ import { ServerDirectory } from "@/components/ServerDirectory";
 import { ServerServices } from "@/components/ServerServices";
 import { useMeta } from "@/components/useMeta";
 import { quotaForDuration, type QuotaEntry, type QuotaMap } from "@/components/quota";
-
-// Token visual (didefinisikan worker tokens di src/styles/tokens.css); fallback
-// di sini menjaga tampilan tetap waras bila token belum terisi.
-const heroHeadingStyle: CSSProperties = {
-  fontFamily: "var(--font-sans, 'Plus Jakarta Sans', system-ui, sans-serif)",
-  fontWeight: 800,
-  letterSpacing: "-0.02em",
-};
-
-const sectionHeadingStyle: CSSProperties = {
-  fontFamily: "var(--font-sans, 'Plus Jakarta Sans', system-ui, sans-serif)",
-  fontWeight: 800,
-  letterSpacing: "-0.015em",
-};
-
-const quotaBoxStyle: CSSProperties = {
-  background: "var(--surface-tint, #eaf3f8)",
-  border: "1px solid color-mix(in srgb, var(--primary, #0866b5) 28%, transparent)",
-  borderRadius: "var(--radius, 8px)",
-  padding: "1rem 1.15rem",
-};
 
 export type Meta = {
   services: Service[];
@@ -76,13 +54,12 @@ function LoadingPanel({ label }: { label: string }) {
 function MetaErrorPanel({ onRetry }: { onRetry: () => void }) {
   return (
     <div className="panel" role="alert">
-      <h2>Data tidak dapat dimuat</h2>
+      <h2>Data belum dapat dimuat</h2>
       <p>
-        Koneksi ke server portal terputus. Periksa koneksi internet Anda lalu coba lagi. Akun yang
-        sudah dibuat sebelumnya tidak terpengaruh.
+        Koneksi ke portal terputus. Periksa internet Anda lalu coba lagi. Akun yang sudah dibuat tetap aman.
       </p>
       <button className="button-primary" type="button" onClick={onRetry}>
-        Coba lagi
+        Try again
       </button>
     </div>
   );
@@ -98,19 +75,14 @@ function SiteStatePanel({ meta }: { meta: Meta }) {
         <circle cx="232" cy="30" r="4" />
       </svg>
       <p className="eyebrow">PORTAL AKUN VPN</p>
-      <h1 id="site-state-title" style={heroHeadingStyle}>
-        {closed ? "Portal ditutup" : "Portal sedang dirawat"}
-      </h1>
+      <h1 id="site-state-title">{closed ? "Portal ditutup" : "Portal sedang maintenance"}</h1>
       <p>
         {meta.siteMessage ||
           (closed
-            ? "Layanan portal ini telah ditutup."
-            : "Pembuatan akun sedang dihentikan sementara.")}
+            ? "Portal ini sudah ditutup."
+            : "Create akun dihentikan sementara.")}
       </p>
-      <p className="muted">
-        Halaman ini memeriksa status portal secara berkala selama tab terbuka dan menampilkan portal
-        lagi begitu tersedia.
-      </p>
+      <p className="muted">Coba refresh halaman nanti untuk melihat update terbaru.</p>
     </section>
   );
 }
@@ -126,11 +98,11 @@ function ServiceView({ meta, serviceId }: { meta: Meta; serviceId: string }) {
   if (!selected && meta.services.length > 0) {
     return (
       <section className="recovery-page" aria-labelledby="service-missing-title">
-        <p className="eyebrow">Layanan VPN</p>
-        <h1 id="service-missing-title">Layanan tidak tersedia</h1>
-        <p>Layanan {serviceId} tidak ada di daftar server saat ini.</p>
+        <p className="eyebrow">VPN Service</p>
+        <h1 id="service-missing-title">Service tidak tersedia</h1>
+        <p>Service {serviceId} belum ada di daftar server.</p>
         <Link className="button-primary recovery-home" href="/">
-          Kembali ke beranda
+          Kembali ke Home
         </Link>
       </section>
     );
@@ -139,12 +111,9 @@ function ServiceView({ meta, serviceId }: { meta: Meta; serviceId: string }) {
   if (!selected?.available || catalogUnavailable || paused) {
     return (
       <section className="service-page" aria-labelledby="service-title">
-        <div className="service-heading">
-          <span className="service-icon">
-            <ServiceIcon id={serviceId} />
-          </span>
+        <div className="service-heading service-heading--compact">
           <div>
-            <p className="eyebrow">Layanan VPN</p>
+            <p className="eyebrow">VPN Service</p>
             <h1 id="service-title">{selected?.service_label ?? selected?.label ?? serviceId}</h1>
           </div>
         </div>
@@ -153,16 +122,16 @@ function ServiceView({ meta, serviceId }: { meta: Meta; serviceId: string }) {
           <TriangleAlert aria-hidden="true" />
           <h2>
             {catalogUnavailable
-              ? "Server sedang tidak dapat dihubungi"
+              ? "Server tidak dapat dihubungi"
               : paused
-                ? "Pembuatan akun dijeda"
-                : "Layanan tidak tersedia"}
+                ? "Create akun dijeda"
+                : "Service tidak tersedia"}
           </h2>
           <p>
             {catalogUnavailable
-              ? "Daftar layanan belum dapat diperbarui. Coba lagi beberapa saat."
+              ? "Daftar service gagal diperbarui. Coba lagi sebentar."
               : paused
-                ? "Admin menjeda pembuatan akun untuk layanan ini sementara waktu."
+                ? "Admin menjeda pembuatan akun untuk service ini sementara."
                 : selected?.reason || "Coba lagi nanti."}
           </p>
           {catalogUnavailable ? (
@@ -171,11 +140,11 @@ function ServiceView({ meta, serviceId }: { meta: Meta; serviceId: string }) {
               type="button"
               onClick={() => window.location.reload()}
             >
-              Coba lagi
+              Try again
             </button>
           ) : (
             <Link className="button-secondary" href="/">
-              Lihat server dan layanan lain
+              Lihat server dan service lain
             </Link>
           )}
         </div>
@@ -185,12 +154,9 @@ function ServiceView({ meta, serviceId }: { meta: Meta; serviceId: string }) {
 
   return (
     <section className="service-page" aria-labelledby="service-title">
-      <div className="service-heading">
-        <span className="service-icon">
-          <ServiceIcon id={serviceId} />
-        </span>
+      <div className="service-heading service-heading--compact">
         <div>
-          <p className="eyebrow">Layanan VPN</p>
+          <p className="eyebrow">VPN Service</p>
           <h1 id="service-title">{selected.service_label ?? selected.label}</h1>
           {selected.server_label ? (
             <p className="service-server-label">
@@ -204,7 +170,7 @@ function ServiceView({ meta, serviceId }: { meta: Meta; serviceId: string }) {
               )}
             </p>
           ) : null}
-          <p>Pilih durasi, buat akun, lalu simpan detail koneksi sebelum meninggalkan halaman.</p>
+          <p>Pilih durasi, lalu create akun.</p>
         </div>
       </div>
       <NoticeBanner meta={meta} />
@@ -215,25 +181,25 @@ function ServiceView({ meta, serviceId }: { meta: Meta; serviceId: string }) {
         meta={meta}
         serviceId={serviceId}
       />
-      <section className="panel service-account-panel" aria-label="Buat akun">
-        <div className="quota-summary-inline" style={quotaBoxStyle}>
-          <h2 style={sectionHeadingStyle}>Kuota hari ini</h2>
+      <section className="panel service-account-panel" aria-label="Create account">
+        <div className="quota-summary-inline">
+          <h2>Quota hari ini</h2>
           {quota ? (
             <>
               <p className="quota-number">
                 {quota.used}
-                <span>/{quota.limit} terpakai</span>
+                <span>/{quota.limit} used</span>
               </p>
-              <progress value={quota.used} max={quota.limit} aria-label="Kuota terpakai" />
+              <progress value={quota.used} max={quota.limit} aria-label="Quota terpakai" />
               <p>
-                Sisa {quota.remaining} akun {day} hari
+                Tersisa {quota.remaining} akun untuk {day} hari
               </p>
               <p className="muted">
-                <Clock3 size={16} aria-hidden="true" /> <QuotaCountdown resetsAt={quota.resetsAt} />
+                <Clock3 size={16} aria-hidden="true" /> <QuotaCountdown />
               </p>
             </>
           ) : (
-            <p role="status">Kuota belum dapat dimuat.</p>
+            <p role="status">Quota belum dapat dimuat.</p>
           )}
         </div>
         <AccountForm
@@ -258,18 +224,18 @@ export function Portal({ serviceId, serverId }: { serviceId?: string; serverId?:
     if (serviceId) {
       return (
         <section className="service-page" aria-label="Memuat">
-          <LoadingPanel label="Memuat data layanan" />
+          <LoadingPanel label="Loading service data" />
         </section>
       );
     }
     if (serverId) {
       return (
         <section className="server-page" aria-label="Memuat">
-          <LoadingPanel label="Memuat data server" />
+          <LoadingPanel label="Loading server data" />
         </section>
       );
     }
-    return <LoadingPanel label="Memuat data portal" />;
+    return <LoadingPanel label="Loading portal data" />;
   }
 
   if (meta.siteMode === "maintenance" || meta.siteMode === "closed") {

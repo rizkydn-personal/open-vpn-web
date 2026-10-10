@@ -19,17 +19,17 @@ export function RecoveryError({ retry, digest }: { retry: () => void; digest?: s
         padding: "clamp(1.5rem, 4vw, 2.5rem)",
       }}
     >
-      <p className="eyebrow">Terjadi kendala</p>
-      <h1 id="recovery-title">Halaman ini belum dapat ditampilkan.</h1>
-      <p>Coba muat ulang bagian ini. Jika perlu bantuan, sampaikan kode kejadian berikut.</p>
-      <p className="recovery-code">Kode kejadian: {digest?.slice(0, 8) ?? id}</p>
+      <p className="eyebrow">Something went wrong</p>
+      <h1 id="recovery-title">Halaman belum dapat ditampilkan.</h1>
+      <p>Coba refresh halaman. Jika perlu bantuan, sertakan error code berikut.</p>
+      <p className="recovery-code">Error code: {digest?.slice(0, 8) ?? id}</p>
       <button
         className="button-primary"
         type="button"
         onClick={retry}
         style={{ borderRadius: "var(--radius-pill)" }}
       >
-        Coba lagi
+        Try again
       </button>
     </section>
   );

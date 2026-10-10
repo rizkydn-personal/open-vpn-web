@@ -40,7 +40,7 @@ export function NavLinks({
           aria-current={pathname === "/" ? "page" : undefined}
           style={pillStyle(pathname === "/")}
         >
-          Beranda
+          Home
         </Link>
       }
       {serverId

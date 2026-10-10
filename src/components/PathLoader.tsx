@@ -5,7 +5,7 @@ type PathLoaderProps = {
   decorative?: boolean;
 };
 
-export function PathLoader({ size = "md", label = "Memuat", decorative = false }: PathLoaderProps) {
+export function PathLoader({ size = "md", label = "Loading", decorative = false }: PathLoaderProps) {
   const svg = (
     <svg viewBox="0 0 120 32" aria-hidden="true" focusable="false">
       <circle className="path-loader__device" cx="12" cy="16" r="5" />
