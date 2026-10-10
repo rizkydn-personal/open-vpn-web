@@ -23,24 +23,24 @@ const sectionHeadingStyle: CSSProperties = {
 const cardStyle: CSSProperties = {
   background: "var(--surface, #ffffff)",
   border: "1px solid var(--line, rgba(24, 51, 69, 0.14))",
-  borderRadius: "var(--radius-lg, 20px)",
+  borderRadius: "var(--radius-lg, 10px)",
   boxShadow: "var(--shadow-soft, 0 12px 32px rgba(24, 51, 69, 0.08))",
 };
 
 const chipStyle: CSSProperties = {
-  borderRadius: "var(--radius-pill, 999px)",
+  borderRadius: "var(--radius-pill, 6px)",
   background: "var(--surface-tint, #eaf3f8)",
   border: "1px solid transparent",
 };
 
 const chipOffStyle: CSSProperties = {
-  borderRadius: "var(--radius-pill, 999px)",
+  borderRadius: "var(--radius-pill, 6px)",
 };
 
 const noteStyle: CSSProperties = {
   background: "var(--surface-tint, #eaf3f8)",
   border: "1px solid color-mix(in srgb, var(--primary, #0866b5) 28%, transparent)",
-  borderRadius: "var(--radius, 12px)",
+  borderRadius: "var(--radius, 8px)",
 };
 
 const protocolDetails: Record<string, string> = {

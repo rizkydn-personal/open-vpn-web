@@ -98,7 +98,7 @@ h4 {
   height: 2.5rem;
   display: grid;
   place-items: center;
-  border-radius: 0.75rem;
+  border-radius: 0.5rem;
   background: var(--primary);
   color: var(--surface);
   font-size: 0.85rem;
@@ -130,7 +130,7 @@ h4 {
   min-height: 2.75rem;
   display: inline-flex;
   align-items: center;
-  border-radius: 0.6rem;
+  border-radius: 0.5rem;
   color: var(--muted);
   gap: 0.35rem;
   padding: 0.45rem 0.6rem;
@@ -167,7 +167,7 @@ h4 {
   align-items: center;
   gap: 0.5rem;
   border: 1px solid var(--line);
-  border-radius: 0.6rem;
+  border-radius: 0.5rem;
   background: var(--surface);
   color: var(--ink);
   padding: 0.55rem 0.75rem;
@@ -184,7 +184,7 @@ h4 {
   overflow: auto;
   padding: 0.4rem;
   border: 1px solid var(--line);
-  border-radius: 0.75rem;
+  border-radius: 0.5rem;
   background: var(--surface);
   box-shadow: 0 10px 30px color-mix(in srgb, var(--ink) 8%, transparent);
 }
@@ -237,7 +237,7 @@ h4 {
 .panel {
   min-width: 0;
   border: 1px solid var(--line);
-  border-radius: 0.8rem;
+  border-radius: 0.5rem;
   background: var(--surface);
   padding: clamp(1rem, 3vw, 1.5rem);
 }
@@ -257,7 +257,7 @@ progress {
   height: 0.5rem;
   appearance: none;
   border: 0;
-  border-radius: 999px;
+  border-radius: 4px;
   background: var(--line);
   color: var(--primary);
   overflow: hidden;
@@ -266,11 +266,11 @@ progress::-webkit-progress-bar {
   background: var(--line);
 }
 progress::-webkit-progress-value {
-  border-radius: 999px;
+  border-radius: 4px;
   background: var(--primary);
 }
 progress::-moz-progress-bar {
-  border-radius: 999px;
+  border-radius: 4px;
   background: var(--primary);
 }
 .notice {
@@ -362,7 +362,7 @@ progress::-moz-progress-bar {
   align-items: flex-start;
   gap: 1rem;
   border: 1px solid var(--line);
-  border-radius: 0.8rem;
+  border-radius: 0.5rem;
   background: var(--surface);
   padding: 1.25rem;
   transition:
@@ -444,7 +444,7 @@ progress::-moz-progress-bar {
 }
 .chip {
   border: 1px solid var(--line);
-  border-radius: 0.45rem;
+  border-radius: 0.4rem;
   background: var(--bg);
   color: var(--ink);
   padding: 0.2rem 0.6rem;
@@ -474,7 +474,7 @@ progress::-moz-progress-bar {
   flex-direction: column;
   gap: 0.25rem;
   border: 1px solid var(--line);
-  border-radius: 0.6rem;
+  border-radius: 0.5rem;
   background: var(--bg);
   padding: 0.65rem 0.8rem;
 }
@@ -497,7 +497,7 @@ progress::-moz-progress-bar {
   align-items: center;
   gap: 0.45rem;
   border: 1px solid color-mix(in srgb, var(--primary) 35%, #fff);
-  border-radius: 999px;
+  border-radius: 6px;
   background: var(--sky-tint);
   color: var(--primary);
   padding: 0.25rem 0.75rem;
@@ -725,7 +725,7 @@ progress::-moz-progress-bar {
   height: 3.5rem;
   flex: none;
   place-items: center;
-  border-radius: 0.8rem;
+  border-radius: 0.5rem;
   background: var(--sky-tint);
   color: var(--primary);
 }
@@ -791,7 +791,7 @@ progress::-moz-progress-bar {
   flex: none;
   gap: 0.4rem;
   border: 0;
-  border-radius: 0.55rem;
+  border-radius: 0.4rem;
   padding: 0.6rem 0.95rem;
   font: inherit;
   font-weight: 700;
@@ -857,7 +857,7 @@ progress::-moz-progress-bar {
 .support-card {
   margin-top: 1rem;
   border: 1px solid var(--warm);
-  border-radius: 0.8rem;
+  border-radius: 0.5rem;
   background: var(--warm-tint);
   color: var(--ink);
   padding: 1rem 1.25rem;
@@ -960,8 +960,13 @@ progress::-moz-progress-bar {
   overflow: visible;
 }
 .path-loader--sm svg {
-  width: 2.4rem;
+  width: 3.5rem;
   height: 1rem;
+}
+.path-loader--sm .path-loader__line,
+.path-loader--sm .path-loader__device,
+.path-loader--sm .path-loader__server {
+  stroke-width: 4;
 }
 .path-loader--lg svg {
   width: min(18rem, 75vw);
@@ -985,9 +990,21 @@ progress::-moz-progress-bar {
   animation: path-pulse 1.4s ease-in-out infinite alternate;
 }
 .route-loading {
-  min-height: 12rem;
+  min-height: 10rem;
   display: grid;
   place-items: center;
+}
+/* Inside a filled button the loader inherits the button text color and stays visible. */
+.button-primary .path-loader {
+  color: currentColor;
+}
+.button-primary .path-loader__device,
+.button-primary .path-loader__server {
+  fill: none;
+  animation: none;
+}
+.path-loader {
+  flex: none;
 }
 .legal {
   max-width: 44rem;
@@ -1047,7 +1064,7 @@ progress::-moz-progress-bar {
   display: inline-flex;
   align-items: center;
   border: 1px solid var(--line);
-  border-radius: 0.55rem;
+  border-radius: 0.4rem;
   background: var(--surface);
   color: var(--primary);
   padding: 0.45rem 0.9rem;
@@ -1111,7 +1128,7 @@ progress::-moz-progress-bar {
   gap: 0.3rem;
   align-content: start;
   border: 1px solid var(--line);
-  border-radius: 0.7rem;
+  border-radius: 0.5rem;
   background: var(--surface);
   padding: 0.9rem 1rem;
   cursor: pointer;
@@ -1165,9 +1182,10 @@ progress::-moz-progress-bar {
 .loading-panel {
   display: grid;
   gap: 0.75rem;
-  justify-items: start;
+  justify-items: center;
   align-content: center;
-  min-height: 16rem;
+  min-height: 10rem;
+  text-align: center;
 }
 .loading-panel p {
   margin: 0;
@@ -1210,7 +1228,7 @@ progress::-moz-progress-bar {
 .payload-block {
   margin: 0 0 1rem;
   border: 1px solid var(--line);
-  border-radius: 0.7rem;
+  border-radius: 0.5rem;
   background: var(--bg);
   padding: 1rem 1.15rem;
 }
@@ -1448,7 +1466,7 @@ progress::-moz-progress-bar {
   height: 2.5rem;
   display: grid;
   place-items: center;
-  border-radius: var(--radius, 12px);
+  border-radius: var(--radius, 8px);
   background: color-mix(in srgb, var(--primary, #0866b5) 10%, var(--surface, #ffffff));
   border: 1px solid color-mix(in srgb, var(--primary, #0866b5) 18%, transparent);
   color: var(--primary, #0866b5);
@@ -1461,7 +1479,7 @@ progress::-moz-progress-bar {
   color: var(--ink, #183345);
 }
 .server-services-restyle .service-list__action {
-  border-radius: var(--radius-pill, 999px);
+  border-radius: var(--radius-pill, 6px);
   background: var(--primary, #0866b5);
   border-color: var(--primary, #0866b5);
   color: #ffffff;
@@ -1487,7 +1505,7 @@ progress::-moz-progress-bar {
   background: var(--warm, #f2c438);
 }
 .server-services-restyle .notice {
-  border-radius: var(--radius, 12px);
+  border-radius: var(--radius, 8px);
   background: color-mix(in srgb, var(--warm, #f2c438) 14%, var(--surface, #ffffff));
   border: 1px solid color-mix(in srgb, var(--warm, #f2c438) 55%, var(--line, #dfe5ea));
   border-left: 4px solid var(--warm, #f2c438);

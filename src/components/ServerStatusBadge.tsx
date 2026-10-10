@@ -16,7 +16,7 @@ const PILL: CSSProperties = {
   alignItems: "center",
   gap: "0.375rem",
   padding: "0.22rem 0.65rem",
-  borderRadius: "var(--radius-pill, 999px)",
+  borderRadius: "var(--radius-pill, 6px)",
   fontSize: "0.75rem",
   fontWeight: 600,
   lineHeight: 1.5,

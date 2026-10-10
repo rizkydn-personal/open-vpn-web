@@ -31,7 +31,7 @@ const sectionHeadingStyle: CSSProperties = {
 const quotaBoxStyle: CSSProperties = {
   background: "var(--surface-tint, #eaf3f8)",
   border: "1px solid color-mix(in srgb, var(--primary, #0866b5) 28%, transparent)",
-  borderRadius: "var(--radius, 12px)",
+  borderRadius: "var(--radius, 8px)",
   padding: "1rem 1.15rem",
 };
 
