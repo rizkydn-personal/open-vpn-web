@@ -16,8 +16,8 @@
   --radius-lg: 10px;
   --radius-pill: 6px; /* name kept for existing references; no longer a full pill */
   --shadow-soft: 0 24px 80px rgb(24 51 69 / 0.12);
-  /* --font-jakarta is injected by next/font in layout.tsx; the literal family name is a local fallback. */
-  --font-sans: var(--font-jakarta), "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system,
+    BlinkMacSystemFont, "Segoe UI", sans-serif;
   /* Dipakai kode yang ada (jaga kompatibilitas). */
   --sky-tint: color-mix(in srgb, var(--sky) 12%, #fff);
 }

@@ -1,4 +1,5 @@
 import { Portal } from "@/components/Portal";
+import { initialMeta } from "@/lib/initialMeta";
 
 export const dynamic = "force-dynamic";
 
@@ -10,5 +11,6 @@ export default async function ServicePage({
   params: Promise<{ service: string }>;
 }) {
   const { service } = await params;
-  return <Portal key={service} serviceId={service} />;
+  const meta = await initialMeta();
+  return <Portal key={service} serviceId={service} initialMeta={meta} />;
 }

@@ -1,9 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { Meta } from "@/components/Portal";
-
-const POLL_INTERVAL_MS = 30_000;
 
 type MetaState = {
   meta: Meta | null;
@@ -11,13 +9,12 @@ type MetaState = {
   retry: () => void;
 };
 
-// Memuat /api/meta di klien: first paint tidak menunggu upstream.
-// Polling berjeda 30 detik dan berhenti saat tab tidak terlihat.
-export function useMeta(): MetaState {
-  const [meta, setMeta] = useState<Meta | null>(null);
+// Data awal dirender di server. Request klien hanya berjalan saat pengguna
+// meminta retry setelah kegagalan, sehingga status berubah hanya saat refresh.
+export function useMeta(initialMeta: Meta): MetaState {
+  const [meta, setMeta] = useState<Meta | null>(initialMeta);
   const [failed, setFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);
-  const timer = useRef<number | undefined>(undefined);
 
   const retry = useCallback(() => {
     setFailed(false);
@@ -46,32 +43,12 @@ export function useMeta(): MetaState {
       }
     }
 
-    function schedule() {
-      window.clearTimeout(timer.current);
-      timer.current = window.setTimeout(async () => {
-        await load();
-        if (alive) schedule();
-      }, POLL_INTERVAL_MS);
-    }
-
-    function onVisibility() {
-      if (!document.hidden) {
-        void load();
-        schedule();
-      }
-    }
-
-    void load().then(() => {
-      if (alive) schedule();
-    });
-    document.addEventListener("visibilitychange", onVisibility);
+    if (initialMeta.unavailable) void load();
     return () => {
       alive = false;
       controller.abort();
-      window.clearTimeout(timer.current);
-      document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, [attempt]);
+  }, [attempt, initialMeta]);
 
   return { meta, failed: failed && meta === null, retry };
 }

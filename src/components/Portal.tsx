@@ -214,8 +214,16 @@ function ServiceView({ meta, serviceId }: { meta: Meta; serviceId: string }) {
   );
 }
 
-export function Portal({ serviceId, serverId }: { serviceId?: string; serverId?: string }) {
-  const { meta, failed, retry } = useMeta();
+export function Portal({
+  serviceId,
+  serverId,
+  initialMeta,
+}: {
+  serviceId?: string;
+  serverId?: string;
+  initialMeta: Meta;
+}) {
+  const { meta, failed, retry } = useMeta(initialMeta);
 
   if (failed) {
     return <MetaErrorPanel onRetry={retry} />;
