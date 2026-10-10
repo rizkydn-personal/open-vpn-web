@@ -67,11 +67,14 @@ test("mobile menu exposes services and service page has no serious accessibility
   await page.goto("/");
   const toggle = page.getByRole("button", { name: /Menu/ });
   await toggle.click();
+  const menu = page.getByRole("navigation", { name: "Navigasi" });
   await expect(page.getByRole("link", { name: "Uji", exact: true })).toBeVisible();
+  await expect(menu.getByRole("link", { name: "SSH", exact: true })).toHaveCount(0);
   await page.getByRole("link", { name: "Uji", exact: true }).click();
   await page.getByRole("button", { name: /Menu/ }).click();
-  await expect(page.getByRole("link", { name: "SSH", exact: true })).toBeVisible();
-  await expect(page.getByRole("link", { name: "VMess", exact: true })).toBeVisible();
+  await expect(menu.getByRole("link", { name: "SSH", exact: true })).toHaveCount(1);
+  await expect(menu.getByRole("link", { name: "VMess", exact: true })).toHaveCount(1);
+  await expect(menu.getByRole("link", { name: "OpenVPN TCP", exact: true })).toHaveCount(1);
   await page.getByRole("button", { name: /Menu/ }).click();
   await expect(page.getByRole("link", { name: "Pilih OpenVPN UDP", exact: true })).toBeVisible();
   await page.getByRole("link", { name: "Pilih VMess", exact: true }).click();

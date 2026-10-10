@@ -109,21 +109,6 @@ export function ServiceMenu({
           ) : (
             <>
               <p className="mobile-menu__heading" style={headingStyle}>
-                Semua layanan
-              </p>
-              {services.map((service) => (
-                <Link
-                  key={service.id}
-                  href={`/s/${encodeURIComponent(service.id)}`}
-                  aria-current={
-                    pathname === `/s/${encodeURIComponent(service.id)}` ? "page" : undefined
-                  }
-                  onClick={() => setOpen(false)}
-                >
-                  <ServiceIcon id={service.id} size={20} /> {service.service_label ?? service.label}
-                </Link>
-              ))}
-              <p className="mobile-menu__heading" style={headingStyle}>
                 Server
               </p>
               {servers.map((server) => (
