@@ -2,28 +2,12 @@
 
 import Link from "next/link";
 import { ShieldCheck } from "lucide-react";
-import { useEffect, useState } from "react";
 import type { Service } from "@/lib/vpnApi";
 import { ServiceMenu } from "@/components/ServiceMenu";
 import { NavLinks } from "@/components/NavLinks";
 import { groupServicesByServer } from "@/lib/serverDirectory";
 
-// Navigasi dimuat sisi klien agar header selalu ter-render instan tanpa
-// menunggu API upstream.
-export function Navbar() {
-  const [services, setServices] = useState<Service[]>([]);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    fetch("/api/meta", { cache: "no-store", signal: controller.signal })
-      .then((response) => (response.ok ? response.json() : null))
-      .then((payload) => {
-        if (Array.isArray(payload?.data?.services)) setServices(payload.data.services);
-      })
-      .catch(() => undefined);
-    return () => controller.abort();
-  }, []);
-
+export function Navbar({ services = [] }: { services?: Service[] }) {
   const servers = groupServicesByServer(services).map(({ id, label }) => ({ id, label }));
   return (
     <header

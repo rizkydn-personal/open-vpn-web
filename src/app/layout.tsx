@@ -1,15 +1,9 @@
 import type { Metadata, Viewport } from "next";
-import { Plus_Jakarta_Sans } from "next/font/google";
 import Link from "next/link";
 import { Navbar } from "@/components/Navbar";
 import { getEnv } from "@/lib/env";
+import { initialMeta } from "@/lib/initialMeta";
 import "./globals.css";
-
-const jakarta = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-  variable: "--font-jakarta",
-});
 
 const description =
   "Portal untuk membuat akun VPN gratis. Pilih server dan service, lalu simpan connection details.";
@@ -23,7 +17,8 @@ export const metadata: Metadata = {
 };
 export const viewport: Viewport = { themeColor: "#0866b5" };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const meta = await initialMeta();
   // Defensif saat build/prerender tanpa env lengkap: footer dukungan disembunyikan.
   let supportUrl: string | undefined;
   try {
@@ -32,12 +27,12 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     supportUrl = undefined;
   }
   return (
-    <html lang="id" className={jakarta.variable}>
+    <html lang="id">
       <body>
         <a className="skip-link" href="#main-content">
           Skip to content
         </a>
-        <Navbar />
+        <Navbar services={meta.services} />
         <main id="main-content" className="page-shell">
           {children}
         </main>
