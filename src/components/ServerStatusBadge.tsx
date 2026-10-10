@@ -4,9 +4,9 @@ import type { ServerHealth } from "@/lib/serverDirectory";
 function label(health: ServerHealth, available?: number): string {
   if (health === "online") {
     if (available === undefined) return "Online";
-    return available > 0 ? "Online / Tersedia" : "Online / Layanan tidak tersedia";
+    return available > 0 ? "Online" : "Offline";
   }
-  return health === "stale" ? "Status terakhir diketahui" : "Status belum tersedia";
+  return health === "stale" ? "Status terakhir" : "Status unavailable";
 }
 
 // Pill kecil: dot + teks, tanpa kapsul berat. Inline style agar konsisten di semua
@@ -18,7 +18,7 @@ const PILL: CSSProperties = {
   padding: "0.22rem 0.65rem",
   borderRadius: "var(--radius-pill, 6px)",
   fontSize: "0.75rem",
-  fontWeight: 600,
+  fontWeight: 800,
   lineHeight: 1.5,
   whiteSpace: "nowrap",
 };
@@ -33,16 +33,12 @@ const DOT: CSSProperties = {
 
 const VARIANTS: Record<ServerHealth, CSSProperties> = {
   online: {
-    background: "var(--surface-tint, #eaf3f8)",
-    color: "var(--primary, #0866b5)",
+    color: "var(--primary, #09ff00)",
   },
   stale: {
-    background: "color-mix(in srgb, var(--warm, #f2c438) 16%, var(--surface, #ffffff))",
-    color: "var(--ink, #183345)",
+    color: "var(--ink, #ff7b00)",
   },
   unknown: {
-    background: "var(--surface, #ffffff)",
-    border: "1px solid var(--line, #dfe5ea)",
     color: "var(--muted, #526573)",
   },
 };
@@ -61,7 +57,7 @@ export function ServerStatusBadge({
   available?: number;
 }) {
   return (
-    <span className={`status-badge status-badge--${health}`} style={{ ...PILL, ...VARIANTS[health] }}>
+    <span className={`status-badge--${health}`} style={{ ...PILL, ...VARIANTS[health] }}>
       <span
         className="status-badge__dot"
         aria-hidden="true"

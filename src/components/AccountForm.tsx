@@ -58,10 +58,10 @@ function SshDetails({ connection }: { connection: Record<string, unknown> }) {
       : [];
   return (
     <div className="payload-block payload-block--polish">
-      <h3>Detail koneksi SSH</h3>
+      <h3>SSH connection details</h3>
       <dl>
         <Field label="Host" value={textValue(connection.host)} />
-        <Field label="Kata sandi" value={textValue(connection.password)} />
+        <Field label="Password" value={textValue(connection.password)} />
         {ports.length > 0 ? (
           <div className="account-field">
             <dt>Port</dt>
@@ -74,8 +74,8 @@ function SshDetails({ connection }: { connection: Record<string, unknown> }) {
       </dl>
       <p className="muted">
         {ports.length > 0
-          ? "Masukkan host, username, kata sandi, dan salah satu port di atas ke aplikasi SSH atau tunneling."
-          : "Masukkan host, username, dan kata sandi ke aplikasi SSH atau tunneling."}
+          ? "Masukkan host, username, password, dan salah satu port di atas ke aplikasi SSH atau tunneling."
+          : "Masukkan host, username, dan password ke aplikasi SSH atau tunneling."}
       </p>
     </div>
   );
@@ -94,11 +94,11 @@ function XrayDetails({
       : {};
   const wsTls = textValue(links.ws_tls);
   const wsNoneTls = textValue(links.ws_none_tls);
-  const credentialLabel = protocol === "trojan" ? "Kata sandi" : "UUID";
+  const credentialLabel = protocol === "trojan" ? "Password" : "UUID";
   const credential = textValue(connection.uuid ?? connection.password);
   return (
     <div className="payload-block payload-block--polish">
-      <h3>Tautan koneksi siap impor</h3>
+      <h3>Connection link siap diimpor</h3>
       <dl>
         <Field label={credentialLabel} value={credential} />
         {wsTls ? (
@@ -121,7 +121,7 @@ function XrayDetails({
         ) : null}
       </dl>
       <p className="muted">
-        Salin salah satu tautan di atas lalu impor ke aplikasi klien yang mendukung{" "}
+        Copy salah satu link di atas lalu impor ke aplikasi yang mendukung{" "}
         {protocol === "vmess" ? "VMess" : protocol === "vless" ? "VLESS" : "Trojan"}.
       </p>
     </div>
@@ -134,13 +134,13 @@ function OvpnDetails({ connection }: { connection: Record<string, unknown> }) {
   const proto = textValue(connection.proto).toUpperCase();
   return (
     <div className="payload-block payload-block--polish">
-      <h3>Berkas konfigurasi OpenVPN</h3>
+      <h3>File konfigurasi OpenVPN</h3>
       <dl>
         <Field label="Host" value={textValue(connection.host)} />
         <Field label="Port" value={textValue(connection.port)} />
-        {proto ? <Field label="Protokol" value={proto} /> : null}
+        {proto ? <Field label="Protocol" value={proto} /> : null}
         <div className="account-field">
-          <dt>Berkas</dt>
+              <dt>File</dt>
           <dd>
             <span className="technical-value technical-value--box">{filename}</span>
             {content ? (
@@ -149,13 +149,13 @@ function OvpnDetails({ connection }: { connection: Record<string, unknown> }) {
                 className="copy-button"
                 onClick={() => downloadOvpn(filename, content)}
               >
-                Unduh
+                Download
               </button>
             ) : null}
           </dd>
         </div>
       </dl>
-      <p className="muted">Unduh berkas .ovpn lalu impor ke aplikasi OpenVPN.</p>
+      <p className="muted">Download file .ovpn lalu impor ke aplikasi OpenVPN.</p>
     </div>
   );
 }
@@ -167,7 +167,7 @@ function GenericDetails({ connection }: { connection: Record<string, unknown> })
   if (entries.length === 0) return null;
   return (
     <div className="payload-block payload-block--polish">
-      <h3>Detail koneksi</h3>
+      <h3>Connection details</h3>
       <dl>
         {entries.map(([key, value]) => (
           <Field key={key} label={key.replaceAll("_", " ")} value={textValue(value)} />
@@ -289,7 +289,7 @@ export function AccountForm({
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     if (turnstileSiteKey && !token) {
-      setError("Selesaikan verifikasi keamanan di atas.");
+      setError("Selesaikan security verification di atas.");
       return;
     }
     setBusy(true);
@@ -345,7 +345,7 @@ export function AccountForm({
     const protocol = protocolOf(result.service ?? service.id);
     const connection = result.connection ?? {};
     const allText = [
-      `Layanan: ${service.service_label ?? service.label}`,
+      `Service: ${service.service_label ?? service.label}`,
       `Username: ${result.username}`,
       `Berlaku sampai: ${formatWib(result.expires_at)}`,
       ...Object.entries(connection)
@@ -355,22 +355,21 @@ export function AccountForm({
     return (
       <section className="panel result-card result-card--polish">
         <h2 ref={resultHeading} tabIndex={-1}>
-          Akun berhasil dibuat
+          Account berhasil dibuat
         </h2>
         <p className="notice">
-          <TriangleAlert aria-hidden="true" />
-          Detail akun tersimpan sementara di tab ini, maksimal 30 menit. Salin atau unduh sekarang.
+          <TriangleAlert size={18} aria-hidden="true" />
+          Detail akun tersimpan di tab ini selama 30 menit.
         </p>
         <p className="result-once result-once--polish">
           <EyeOff size={18} aria-hidden="true" />
           <span>
-            <strong>Hanya tampil sekali.</strong> Setelah tab ini ditutup, detail tidak dapat
-            dilihat lagi.
+            <strong>Detail hanya tampil sekali.</strong> Setelah tab ditutup, data tidak bisa dilihat lagi.
           </span>
         </p>
         <dl className="account-facts account-facts--polish">
           <div>
-            <dt>Layanan</dt>
+            <dt>Service</dt>
             <dd>{service.service_label ?? service.label}</dd>
           </div>
           <div>
@@ -382,21 +381,21 @@ export function AccountForm({
           </div>
           {result.created_at ? (
             <div>
-              <dt>Dibuat</dt>
+              <dt>Created</dt>
               <dd>{formatWib(result.created_at)}</dd>
             </div>
           ) : null}
           <div>
-            <dt>Masa aktif</dt>
+            <dt>Durasi</dt>
             <dd>{day} hari</dd>
           </div>
           <div>
-            <dt>Berlaku sampai</dt>
+            <dt>Expires</dt>
             <dd>{formatWib(result.expires_at)}</dd>
           </div>
           {typeof result.max_sessions === "number" ? (
             <div>
-              <dt>Batas sesi bersamaan</dt>
+              <dt>Limit sesi bersamaan</dt>
               <dd>{result.max_sessions}</dd>
             </div>
           ) : null}
@@ -412,11 +411,8 @@ export function AccountForm({
         )}
         <div className="result-actions">
           <span className="result-actions__lead">
-            <CopyButton label="Salin semua detail" value={allText} />
+            <CopyButton label="Copy all" value={allText} />
           </span>
-          <button className="button-secondary" type="button" onClick={() => setResult(null)}>
-            Buat lagi
-          </button>
         </div>
       </section>
     );
@@ -427,23 +423,22 @@ export function AccountForm({
       ? "Server masih memproses, jangan tutup halaman ini"
       : elapsedMs >= STAGE_RESERVING_MS
         ? "Menghubungi server"
-        : "Memesan kuota";
+        : "Menyiapkan quota";
 
   return (
     <form className="create-form create-form--embedded" onSubmit={submit}>
-      <h2>Buat akun {day} hari</h2>
       {turnstileSiteKey && (
         <div className="turnstile">
-          <div ref={widget} aria-label="Verifikasi keamanan" />
+          <div ref={widget} aria-label="Security verification" />
         </div>
       )}
       {quotaUnavailable ? (
         <p className="form-error" role="status">
-          Kuota belum dapat diperiksa. Coba lagi beberapa saat.
+          Quota belum dapat diperiksa. Coba lagi sebentar.
         </p>
       ) : null}
       {quota?.remaining === 0 && (
-        <p className="form-error">Kuota {day} hari habis. Reset 00.00 WIB.</p>
+        <p className="form-error">Quota {day} hari habis. Reset 00.00 WIB.</p>
       )}
       {error && (
         <p className="form-error" role="alert">
@@ -462,15 +457,13 @@ export function AccountForm({
             <PathLoader size="sm" decorative /> <span aria-live="polite">{busyLabel}</span>
           </>
         ) : (
-          "Buat akun"
+          "Create account"
         )}
       </button>
       {turnstileSiteKey && !token && (
-        <p className="muted">Selesaikan verifikasi keamanan di atas.</p>
+        <p className="muted">Selesaikan security verification di atas.</p>
       )}
-      <p className="muted">
-        Anda tidak perlu mengisi username atau kata sandi. Keduanya dibuat otomatis.
-      </p>
+      <p className="muted">Username dan password dibuat otomatis.</p>
     </form>
   );
 }

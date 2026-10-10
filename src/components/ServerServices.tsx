@@ -17,7 +17,7 @@ export function ServerServices({ meta, serverId }: { meta: Meta; serverId: strin
           <ArrowLeft size={17} aria-hidden="true" /> Semua server
         </Link>
         <h1 id="server-title">Server belum dapat dimuat</h1>
-        <p role="status">Daftar layanan server ini belum tersedia. Coba muat ulang halaman ini.</p>
+        <p role="status">Daftar service belum tersedia. Coba refresh halaman.</p>
       </section>
     );
   const status = meta.status?.servers?.find((item) => item.id === server.id);
@@ -29,31 +29,30 @@ export function ServerServices({ meta, serverId }: { meta: Meta; serverId: strin
         <ArrowLeft size={17} aria-hidden="true" /> Semua server
       </Link>
       <header className="server-page__heading">
-        <p className="eyebrow">Pilih protokol</p>
+        <p className="eyebrow">Pilih service</p>
         <h1 id="server-title">{server.label}</h1>
         <div className="server-page__meta">
           <ServerStatusBadge
             health={serverHealth(meta.status?.servers, server.id, meta.statusUnavailable)}
             available={server.services.filter((service) => service.available).length}
           />
-          {location ? <span className="server-location">{location}</span> : null}
+          {location ? <span className="server-location">Location: {location}</span> : null}
           {typeof status?.uptime_seconds === "number" && formatUptime(status.uptime_seconds) ? (
             <span className="server-uptime">Uptime {formatUptime(status.uptime_seconds)}</span>
           ) : null}
         </div>
         <p className="server-page__description">
-          Setiap baris di bawah merangkum status protokol, jumlah akun, dan sisa kuota hari ini.
-          Kuota kembali penuh setiap pukul 00.00 WIB.
+          Cek status service dan sisa quota setiap hari. Quota direset pukul 00.00 WIB.
         </p>
       </header>
       {meta.statusUnavailable ? (
         <p className="notice" role="status">
-          Status server terakhir diketahui.{" "}
-          {meta.statusFetchedAt ? `Diperbarui ${formatWib(new Date(meta.statusFetchedAt))}.` : ""}
+          Menampilkan status server terakhir yang tersedia.{" "}
+          {meta.statusFetchedAt ? `Last update ${formatWib(new Date(meta.statusFetchedAt))}.` : ""}
         </p>
       ) : null}
       <div className="server-service-intro">
-        <h2>Protokol di {server.label}</h2>
+        <h2>Service di {server.label}</h2>
       </div>
       <ul className="server-service-list">
         {server.services.map((service) => {
@@ -62,14 +61,14 @@ export function ServerServices({ meta, serverId }: { meta: Meta; serverId: strin
           const state = meta.status?.services?.[service.id];
           const stateText =
             state === "running" || state === true
-              ? "Aktif"
+              ? "Active"
               : state === "stopped" || state === false
-                ? "Berhenti"
+                ? "Stopped"
                 : service.available
-                  ? "Tersedia"
-                  : "Tidak tersedia";
+                  ? "Available"
+                  : "Unavailable";
           const displayedState = meta.statusUnavailable
-            ? `Terakhir diketahui ${stateText.toLowerCase()}`
+            ? `Status terakhir: ${stateText.toLowerCase()}`
             : stateText;
           const paused = meta.pausedServices?.includes(service.id);
           return (
@@ -80,23 +79,22 @@ export function ServerServices({ meta, serverId }: { meta: Meta; serverId: strin
               <div className="service-list__details">
                 <h2>{service.service_label ?? service.label}</h2>
                 <p className="service-list__meta">
-                  <span>{paused ? "Pembuatan akun dijeda" : service.reason || displayedState}</span>
+                  <span>{paused ? "Create akun sedang dijeda" : service.reason || displayedState}</span>
                   <span>
                     {typeof accountCount === "number"
-                      ? `Jumlah akun ${accountCount}`
-                      : "Jumlah akun belum tersedia"}
+                      ? `| ${accountCount} akun`
+                      : "| Data akun belum tersedia"}
                   </span>
                 </p>
                 <p>
                   {quota
-                    ? `Sisa kuota hari ini ${quota.remaining} dari ${quota.limit}`
-                    : "Kuota belum tersedia"}
+                    ? `Quota hari ini: ${quota.remaining} dari ${quota.limit}`
+                    : "Quota belum tersedia"}
                 </p>
               </div>
               {quota ? (
                 <small className="server-service-list__reset">
-                  <Clock3 size={15} aria-hidden="true" />{" "}
-                  <QuotaCountdown resetsAt={quota.resetsAt} />
+                  <Clock3 size={15} aria-hidden="true" /><QuotaCountdown />
                 </small>
               ) : null}
               <Link
@@ -107,9 +105,7 @@ export function ServerServices({ meta, serverId }: { meta: Meta; serverId: strin
                 }
                 href={`/s/${encodeURIComponent(service.id)}`}
               >
-                {service.available && !paused
-                  ? `Pilih ${service.service_label ?? service.label}`
-                  : "Lihat status"}
+                {service.available && !paused ? `Create` : "Cek status"}
               </Link>
             </li>
           );

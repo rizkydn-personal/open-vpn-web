@@ -35,18 +35,18 @@ export function Navbar() {
       }}
     >
       <div className="site-header__inner">
-        <Link className="brand" href="/" aria-label="VPN Gratis, beranda">
+        <Link className="brand" href="/" aria-label="Free VPN Home">
           <span className="brand__mark">
             <ShieldCheck size={21} strokeWidth={1.75} aria-hidden="true" />
           </span>
           <span>
             <span className="brand__name">
-              VPN Gratis<span style={{ color: "var(--primary)" }}>.</span>
+              Free VPN<span style={{ color: "var(--primary)" }}>.</span>
             </span>
-            <span className="brand__caption">rnpproject</span>
+            <span className="brand__caption">QubanTra</span>
           </span>
         </Link>
-        <nav className="desktop-nav" aria-label="Navigasi utama">
+        <nav className="desktop-nav" aria-label="Main navigation">
           <NavLinks servers={servers} services={services} />
         </nav>
         <ServiceMenu servers={servers} services={services} />

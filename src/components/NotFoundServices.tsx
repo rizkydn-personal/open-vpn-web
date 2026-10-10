@@ -19,8 +19,8 @@ export function NotFoundServices() {
   }, []);
   const servers = groupServicesByServer(services);
   return servers.length ? (
-    <nav aria-label="Server yang tersedia">
-      <h2>Atau buka salah satu server</h2>
+    <nav aria-label="Available servers">
+      <h2>Atau pilih server lain</h2>
       <ul className="not-found-services">
         {servers.map((server) => (
           <li key={server.id}>
@@ -35,6 +35,6 @@ export function NotFoundServices() {
       </ul>
     </nav>
   ) : (
-    <p role="status">Daftar server belum dapat dimuat.</p>
+    <p role="status">Server list belum dapat dimuat.</p>
   );
 }

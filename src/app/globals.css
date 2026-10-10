@@ -94,16 +94,19 @@ h4 {
   gap: 0.75rem;
 }
 .brand__mark {
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 2rem;
+  height: 2rem;
   display: grid;
   place-items: center;
-  border-radius: 0.5rem;
-  background: var(--primary);
-  color: var(--surface);
+  color: var(--primary);
   font-size: 0.85rem;
   font-weight: 800;
   letter-spacing: 0.04em;
+}
+.brand__mark svg {
+  width: 1.75rem;
+  height: 1.75rem;
+  stroke-width: 2.15;
 }
 .brand__name {
   display: block;
@@ -275,17 +278,11 @@ progress::-moz-progress-bar {
 }
 .notice {
   display: flex;
-  flex-wrap: wrap;
   gap: 0.55rem;
   margin: 0 0 1.25rem;
-  border: 1px solid color-mix(in srgb, var(--warm) 70%, var(--line));
-  border-left: 4px solid var(--warm);
-  border-radius: 0.5rem;
-  background: var(--warm-tint);
   color: var(--ink);
-  padding: 0.75rem 1rem;
+  padding: 0 0.9rem;
   font-size: 0.92rem;
-  line-height: 1.5;
 }
 .notice svg {
   flex: none;
@@ -293,9 +290,9 @@ progress::-moz-progress-bar {
   color: var(--primary);
 }
 .service-page h1 {
-  margin: 0.2rem 0;
-  font-size: clamp(1.9rem, 4vw, 2.75rem);
-  line-height: 1.1;
+  margin: 0.1rem 0 0.2rem;
+  font-size: clamp(1.75rem, 3vw, 2.25rem);
+  line-height: 1.15;
 }
 .server-directory {
   max-width: 58rem;
@@ -348,7 +345,7 @@ progress::-moz-progress-bar {
 }
 .server-card-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
   gap: 1rem;
   margin: 1.25rem 0 0;
   padding: 0;
@@ -411,7 +408,7 @@ progress::-moz-progress-bar {
 }
 .server-card__title strong {
   color: var(--ink);
-  font-size: 1.2rem;
+  font-size: 1rem;
   line-height: 1.2;
   overflow-wrap: anywhere;
 }
@@ -432,7 +429,7 @@ progress::-moz-progress-bar {
 }
 .server-card__label {
   color: var(--muted);
-  font-size: 0.74rem;
+  font-size: 0.65rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -447,8 +444,8 @@ progress::-moz-progress-bar {
   border-radius: 0.4rem;
   background: var(--bg);
   color: var(--ink);
-  padding: 0.2rem 0.6rem;
-  font-size: 0.82rem;
+  padding: 0.1rem 0.5rem;
+  font-size: 0.72rem;
   font-weight: 650;
 }
 .chip--off {
@@ -476,14 +473,14 @@ progress::-moz-progress-bar {
   border: 1px solid var(--line);
   border-radius: 0.5rem;
   background: var(--bg);
-  padding: 0.65rem 0.8rem;
+  padding: 0.4rem 0.6rem;
 }
 .stat-tile strong {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.5rem;
   color: var(--ink);
-  font-size: 1.05rem;
+  font-size: 0.75rem;
   font-variant-numeric: tabular-nums;
   overflow-wrap: anywhere;
 }
@@ -669,7 +666,7 @@ progress::-moz-progress-bar {
   align-items: center;
   gap: 0.75rem;
   min-height: 5.5rem;
-  border-bottom: 1px solid var(--line);
+  border: 1px solid var(--line);
   padding: 0.8rem 0.25rem;
 }
 .server-service-list h2,
@@ -703,8 +700,8 @@ progress::-moz-progress-bar {
   text-underline-offset: 0.18em;
 }
 .server-nav-mark {
-  width: 0.55rem;
-  height: 0.55rem;
+  width: 0.35rem;
+  height: 0.35rem;
   flex: none;
   border-radius: 50%;
   background: var(--primary);
@@ -712,11 +709,21 @@ progress::-moz-progress-bar {
 .service-heading {
   display: flex;
   align-items: flex-start;
-  gap: 1rem;
-  margin-bottom: 1.25rem;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+.service-heading--compact .service-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+.service-heading--compact .eyebrow {
+  margin: 0;
+}
+.service-heading--compact h1 {
+  margin-top: 0.15rem;
 }
 .service-heading p:last-child {
-  margin: 0.35rem 0 0;
+  margin: 0.45rem 0 0;
   color: var(--muted);
 }
 .service-icon {
@@ -731,22 +738,30 @@ progress::-moz-progress-bar {
 }
 .service-account-panel {
   display: grid;
-  grid-template-columns: minmax(12rem, 0.75fr) minmax(0, 1.25fr);
-  gap: 1.5rem;
-  align-items: start;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+  align-items: stretch;
+  padding: 1.1rem 1.25rem;
 }
 .quota-summary-inline {
-  display: grid;
-  gap: 0.6rem;
-  align-content: start;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem 1.1rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid var(--line);
 }
 .quota-summary-inline h2,
 .quota-summary-inline p {
   margin: 0;
 }
+.quota-summary-inline h2 {
+  flex-basis: 100%;
+  font-size: 1rem;
+}
 .quota-number {
   color: var(--primary);
-  font-size: 1.6rem;
+  font-size: 1.3rem;
   font-weight: 750;
   font-variant-numeric: tabular-nums;
   line-height: 1.2;
@@ -764,6 +779,14 @@ progress::-moz-progress-bar {
   padding: 0;
   border: 0;
   background: transparent;
+}
+.create-form--embedded > h2 {
+  margin: 0 0 0.7rem;
+  font-size: 1rem;
+}
+.create-form--embedded .muted {
+  margin: 0.4rem 0 0;
+  font-size: 0.82rem;
 }
 .muted {
   display: flex;
@@ -832,9 +855,14 @@ progress::-moz-progress-bar {
   border-color: var(--primary);
   background: var(--sky-tint);
 }
+.button-secondary:focus-visible,
+.copy-button:focus-visible {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
 .form-error {
   margin: 0 0 1rem;
-  border-left: 3px solid var(--danger);
   color: var(--danger);
   padding: 0.15rem 0 0.15rem 0.75rem;
   font-size: 0.92rem;
@@ -888,7 +916,7 @@ progress::-moz-progress-bar {
   font-size: 0.84rem;
 }
 .service-list__action {
-  min-height: 44px;
+  min-height: 10px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -990,9 +1018,13 @@ progress::-moz-progress-bar {
   animation: path-pulse 1.4s ease-in-out infinite alternate;
 }
 .route-loading {
-  min-height: 10rem;
+  position: fixed;
+  inset: 0;
+  z-index: 100;
   display: grid;
   place-items: center;
+  background: transparent;
+  pointer-events: none;
 }
 /* Inside a filled button the loader inherits the button text color and stays visible. */
 .button-primary .path-loader {
@@ -1108,29 +1140,31 @@ progress::-moz-progress-bar {
 
 /* Duration cards: satu kartu per pilihan durasi, masing-masing dengan kuota sendiri. */
 .duration-cards {
-  margin: 0 0 1.25rem;
+  margin: 0 0 1rem;
   padding: 0;
   border: 0;
 }
 .duration-cards legend {
-  margin-bottom: 0.6rem;
-  font-size: 1.05rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
   font-weight: 700;
 }
 .duration-cards__grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.75rem;
+  grid-template-columns: repeat(3, minmax(0, 10rem));
+  gap: 0.55rem;
 }
 .duration-card {
   position: relative;
-  display: grid;
-  gap: 0.3rem;
-  align-content: start;
+  display: flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.45rem;
   border: 1px solid var(--line);
   border-radius: 0.5rem;
   background: var(--surface);
-  padding: 0.9rem 1rem;
+  padding: 0.45rem 0.7rem;
   cursor: pointer;
   transition:
     border-color 0.15s ease,
@@ -1141,7 +1175,7 @@ progress::-moz-progress-bar {
 }
 .duration-card--active {
   border-color: var(--primary);
-  background: var(--sky-tint);
+  background: var(--surface-tint);
   box-shadow: inset 0 0 0 1px var(--primary);
 }
 .duration-card--exhausted {
@@ -1161,21 +1195,19 @@ progress::-moz-progress-bar {
   cursor: not-allowed;
 }
 .duration-card:focus-within {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
+  border-color: var(--primary);
+  box-shadow: inset 0 0 0 1px var(--primary);
 }
 .duration-card__days {
-  color: var(--primary);
-  font-size: 1.25rem;
-  font-weight: 750;
+  color: var(--ink);
+  font-size: 0.95rem;
+  font-weight: 650;
   line-height: 1.2;
 }
 .duration-card__quota {
   color: var(--muted);
-  font-size: 0.88rem;
-}
-.duration-card progress {
-  margin-top: 0.2rem;
+  font-size: 0.76rem;
+  text-align: right;
 }
 
 /* Panel status pemuatan data. */
@@ -1184,8 +1216,13 @@ progress::-moz-progress-bar {
   gap: 0.75rem;
   justify-items: center;
   align-content: center;
-  min-height: 10rem;
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  min-height: 100dvh;
+  background: transparent;
   text-align: center;
+  pointer-events: none;
 }
 .loading-panel p {
   margin: 0;
@@ -1194,9 +1231,7 @@ progress::-moz-progress-bar {
 
 /* Kartu hasil akun: fakta akun + blok detail per protokol. */
 .result-once {
-  border-left: 3px solid var(--warm);
-  background: var(--warm-tint);
-  padding: 0.6rem 0.9rem;
+  padding: 0.2rem 0.9rem;
   font-size: 0.92rem;
 }
 .account-facts {
@@ -1230,7 +1265,7 @@ progress::-moz-progress-bar {
   border: 1px solid var(--line);
   border-radius: 0.5rem;
   background: var(--bg);
-  padding: 1rem 1.15rem;
+  padding: 1rem 0.7rem;
 }
 .payload-block h3 {
   margin: 0 0 0.5rem;
@@ -1281,12 +1316,46 @@ progress::-moz-progress-bar {
     width: 100%;
   }
   .duration-cards__grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.4rem;
+  }
+  .duration-card {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 0.55rem;
+  }
+  .duration-card__quota {
+    text-align: left;
+    font-size: 0.72rem;
   }
   .account-facts > div,
   .account-field {
     grid-template-columns: 1fr;
     gap: 0.25rem;
+  }
+  .account-field dd,
+  .account-field--link dd {
+    align-items: center;
+  }
+  .account-facts dd > .technical-value,
+  .account-field dd > .technical-value {
+    display: block;
+    flex: 1 1 0;
+    width: 0;
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-inline: contain;
+    overflow-wrap: normal;
+    white-space: nowrap;
+    scrollbar-width: thin;
+    padding: 0.45rem 0.55rem;
+    border: 1px solid var(--line);
+    border-radius: 0.4rem;
+    background: var(--surface-tint);
   }
 }
 
@@ -1309,12 +1378,7 @@ progress::-moz-progress-bar {
     grid-template-columns: 1fr;
   }
   .service-account-panel {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-  .service-account-panel .create-form--embedded {
-    border-top: 1px solid var(--line);
-    padding-top: 1rem;
+    padding: 1rem;
   }
   .site-footer__inner {
     width: min(100% - 2rem, 74rem);
@@ -1378,12 +1442,7 @@ progress::-moz-progress-bar {
 }
 .result-once.result-once--polish {
   display: flex;
-  align-items: flex-start;
   gap: 0.6rem;
-  background: var(--warm-tint);
-  border: 1px solid var(--warm);
-  border-radius: var(--radius);
-  padding: 0.75rem 1rem;
   font-size: 0.92rem;
   color: var(--ink);
 }
@@ -1400,7 +1459,8 @@ progress::-moz-progress-bar {
 }
 .account-facts.account-facts--polish dd {
   color: var(--ink);
-  font-weight: 600;
+  font-weight: 700;
+  font-size: 0.88rem;
 }
 .technical-value.technical-value--box {
   display: inline-block;
@@ -1425,6 +1485,13 @@ progress::-moz-progress-bar {
   padding: 0.35rem 0.8rem;
   font-size: 0.8rem;
   font-weight: 700;
+}
+.copy-button.copy-button--pill > span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  white-space: nowrap;
 }
 .copy-button.copy-button--pill:hover {
   border-color: var(--primary);
@@ -1503,10 +1570,4 @@ progress::-moz-progress-bar {
 }
 .server-services-restyle .eyebrow::before {
   background: var(--warm, #f2c438);
-}
-.server-services-restyle .notice {
-  border-radius: var(--radius, 8px);
-  background: color-mix(in srgb, var(--warm, #f2c438) 14%, var(--surface, #ffffff));
-  border: 1px solid color-mix(in srgb, var(--warm, #f2c438) 55%, var(--line, #dfe5ea));
-  border-left: 4px solid var(--warm, #f2c438);
 }

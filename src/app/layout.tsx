@@ -12,14 +12,14 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 const description =
-  "Portal untuk membuat akun VPN. Detail koneksi tersedia sementara di tab browser agar dapat disalin atau diunduh.";
+  "Portal untuk membuat akun VPN gratis. Pilih server dan service, lalu simpan connection details.";
 export const metadata: Metadata = {
-  title: { default: "VPN Gratis | Portal Akun VPN", template: "%s | VPN Gratis" },
+  title: { default: "Free VPN | Portal Akun VPN", template: "%s | Free VPN" },
   description,
   ...(process.env.SITE_URL && /^https?:\/\//.test(process.env.SITE_URL)
     ? { metadataBase: new URL(process.env.SITE_URL) }
     : {}),
-  openGraph: { title: "VPN Gratis | Portal Akun VPN", description },
+  openGraph: { title: "Free VPN | Portal Akun VPN", description },
 };
 export const viewport: Viewport = { themeColor: "#0866b5" };
 
@@ -35,7 +35,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="id" className={jakarta.variable}>
       <body>
         <a className="skip-link" href="#main-content">
-          Lewati ke konten
+          Skip to content
         </a>
         <Navbar />
         <main id="main-content" className="page-shell">
@@ -44,15 +44,15 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <footer className="site-footer">
           <div className="site-footer__inner">
             <p>
-              © {new Date().getFullYear()} VPN Gratis · rnpproject. Gunakan layanan dengan
+              © {new Date().getFullYear()} QubanTra. Gunakan service dengan
               bertanggung jawab.
             </p>
-            <nav aria-label="Tautan footer">
-              <Link href="/ketentuan">Ketentuan</Link>
-              <Link href="/privasi">Privasi</Link>
+            <nav aria-label="Footer links">
+              <Link href="/ketentuan">Terms</Link>
+              <Link href="/privasi">Privacy</Link>
               {supportUrl ? (
                 <a href={supportUrl} target="_blank" rel="noopener noreferrer">
-                  Dukungan <span className="sr-only">(membuka tab baru)</span>
+                  Support <span className="sr-only">(opens in a new tab)</span>
                 </a>
               ) : null}
             </nav>
