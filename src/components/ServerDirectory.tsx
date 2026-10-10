@@ -4,6 +4,7 @@ import { ArrowRight, Gauge, Server as ServerIcon, Users } from "lucide-react";
 import type { Meta } from "@/components/Portal";
 import { ServerStatusBadge } from "@/components/ServerStatusBadge";
 import { groupServicesByServer, serverAccountTotal, serverHealth } from "@/lib/serverDirectory";
+import { formatUptime, formatWib } from "@/lib/time";
 
 // Token visual (didefinisikan worker tokens di src/styles/tokens.css); fallback
 // di sini menjaga tampilan tetap waras bila token belum terisi.
@@ -91,12 +92,14 @@ export function ServerDirectory({ meta }: { meta: Meta }) {
         <p className="notice" role="status">
           Sebagian data server belum dapat diperbarui.{" "}
           {meta.statusFetchedAt
-            ? `Status terakhir diperbarui ${new Date(meta.statusFetchedAt).toLocaleString("id-ID", { timeZone: "Asia/Jakarta" })} WIB.`
+            ? `Status terakhir diperbarui ${formatWib(new Date(meta.statusFetchedAt))}.`
             : ""}
         </p>
       ) : null}
       <div className="server-directory__selection">
-        <h2 id="server-selection-title" style={sectionHeadingStyle}>Pilih server</h2>
+        <h2 id="server-selection-title" style={sectionHeadingStyle}>
+          Pilih server
+        </h2>
         <p>Buka satu server untuk melihat status tiap protokol dan sisa kuota hari ini.</p>
       </div>
       {servers.length ? (
@@ -171,9 +174,8 @@ export function ServerDirectory({ meta }: { meta: Meta }) {
                     <span className="stat-tile">
                       <span className="server-card__label">Uptime</span>
                       <strong>
-                        {typeof uptime === "number"
-                          ? `${Math.floor(uptime / 3600)} jam`
-                          : "Belum ada data"}
+                        {(typeof uptime === "number" ? formatUptime(uptime) : null) ??
+                          "Belum ada data"}
                       </strong>
                     </span>
                   </span>
@@ -190,7 +192,9 @@ export function ServerDirectory({ meta }: { meta: Meta }) {
 
       <section className="portal-guide" aria-labelledby="portal-guide-title">
         <header className="portal-guide__heading">
-          <h2 id="portal-guide-title" style={sectionHeadingStyle}>Cara kerja</h2>
+          <h2 id="portal-guide-title" style={sectionHeadingStyle}>
+            Cara kerja
+          </h2>
         </header>
 
         <ol className="portal-guide__steps">
@@ -219,7 +223,9 @@ export function ServerDirectory({ meta }: { meta: Meta }) {
 
         {protocols.length ? (
           <section className="protocol-guide" aria-labelledby="protocol-guide-title">
-            <h2 id="protocol-guide-title" style={sectionHeadingStyle}>Mengenal protokol</h2>
+            <h2 id="protocol-guide-title" style={sectionHeadingStyle}>
+              Mengenal protokol
+            </h2>
             <p>
               Tiap protokol memberi detail koneksi yang berbeda. Pakai persis yang tampil setelah
               akun dibuat.

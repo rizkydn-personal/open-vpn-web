@@ -27,15 +27,7 @@ function textValue(value: unknown): string {
         : "";
 }
 
-function Field({
-  label,
-  value,
-  copyValue,
-}: {
-  label: string;
-  value: string;
-  copyValue?: string;
-}) {
+function Field({ label, value, copyValue }: { label: string; value: string; copyValue?: string }) {
   if (!value) return null;
   return (
     <div className="account-field">
@@ -355,96 +347,13 @@ export function AccountForm({
     const allText = [
       `Layanan: ${service.service_label ?? service.label}`,
       `Username: ${result.username}`,
-      `Berlaku sampai: ${result.expires_at}`,
+      `Berlaku sampai: ${formatWib(result.expires_at)}`,
       ...Object.entries(connection)
         .filter(([key]) => key !== "content")
         .map(([key, value]) => `${key}: ${textValue(value)}`),
     ].join("\n");
     return (
-      <section className="panel result-card result-card--polish" aria-live="polite">
-        <style>{`
-          /* Restyle kartu hasil akun (milik worker restyle): bahasa visual baru via token CSS. */
-          .result-card.result-card--polish {
-            background: var(--surface);
-            border: 1px solid var(--line);
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-soft);
-            padding: clamp(1.25rem, 4vw, 2rem);
-          }
-          .result-card--polish > h2 {
-            font-family: var(--font-sans);
-            font-weight: 700;
-            letter-spacing: -0.01em;
-            margin: 0 0 1rem;
-          }
-          .result-once.result-once--polish {
-            display: flex;
-            align-items: flex-start;
-            gap: 0.6rem;
-            background: var(--warm-tint);
-            border: 1px solid var(--warm);
-            border-radius: var(--radius);
-            padding: 0.75rem 1rem;
-            font-size: 0.92rem;
-            color: var(--ink);
-          }
-          .result-once--polish > svg {
-            flex: none;
-            margin-top: 0.2rem;
-          }
-          .account-facts.account-facts--polish dt {
-            text-transform: uppercase;
-            letter-spacing: 0.07em;
-            font-size: 0.72rem;
-            font-weight: 700;
-            color: var(--muted);
-          }
-          .account-facts.account-facts--polish dd {
-            color: var(--ink);
-            font-weight: 600;
-          }
-          .technical-value.technical-value--box {
-            display: inline-block;
-            background: var(--surface-tint);
-            border: 1px solid var(--line);
-            border-radius: 0.5rem;
-            padding: 0.3rem 0.65rem;
-            color: var(--ink);
-          }
-          .payload-block.payload-block--polish {
-            background: var(--surface-tint);
-            border: 1px solid var(--line);
-            border-radius: var(--radius);
-          }
-          .payload-block--polish h3 {
-            font-family: var(--font-sans);
-            color: var(--ink);
-          }
-          .copy-button.copy-button--pill {
-            border-radius: var(--radius-pill);
-            min-height: 0;
-            padding: 0.35rem 0.8rem;
-            font-size: 0.8rem;
-            font-weight: 700;
-          }
-          .copy-button.copy-button--pill:hover {
-            border-color: var(--primary);
-            background: color-mix(in srgb, var(--primary) 8%, var(--surface));
-          }
-          .copy-button.copy-button--pill:focus-visible {
-            outline: 2px solid var(--primary);
-            outline-offset: 2px;
-          }
-          .result-actions__lead .copy-button.copy-button--pill {
-            background: var(--primary);
-            border-color: var(--primary);
-            color: #fff;
-          }
-          .result-actions__lead .copy-button.copy-button--pill:hover {
-            background: var(--primary-hover);
-            border-color: var(--primary-hover);
-          }
-        `}</style>
+      <section className="panel result-card result-card--polish">
         <h2 ref={resultHeading} tabIndex={-1}>
           Akun berhasil dibuat
         </h2>
@@ -485,10 +394,12 @@ export function AccountForm({
             <dt>Berlaku sampai</dt>
             <dd>{formatWib(result.expires_at)}</dd>
           </div>
-          <div>
-            <dt>Batas sesi bersamaan</dt>
-            <dd>{result.max_sessions ?? "1 (bawaan)"}</dd>
-          </div>
+          {typeof result.max_sessions === "number" ? (
+            <div>
+              <dt>Batas sesi bersamaan</dt>
+              <dd>{result.max_sessions}</dd>
+            </div>
+          ) : null}
         </dl>
         {protocol === "ssh" ? (
           <SshDetails connection={connection} />
@@ -548,7 +459,7 @@ export function AccountForm({
       >
         {busy ? (
           <>
-            <PathLoader size="sm" label={busyLabel} /> {busyLabel}
+            <PathLoader size="sm" decorative /> <span aria-live="polite">{busyLabel}</span>
           </>
         ) : (
           "Buat akun"

@@ -67,7 +67,7 @@ function NoticeBanner({ meta }: { meta: Meta }) {
 function LoadingPanel({ label }: { label: string }) {
   return (
     <div className="panel loading-panel" role="status">
-      <PathLoader size="md" label={label} />
+      <PathLoader size="md" decorative />
       <p>{label}...</p>
     </div>
   );
@@ -91,7 +91,7 @@ function MetaErrorPanel({ onRetry }: { onRetry: () => void }) {
 function SiteStatePanel({ meta }: { meta: Meta }) {
   const closed = meta.siteMode === "closed";
   return (
-    <section className="recovery-page" aria-labelledby="site-state-title">
+    <section className="recovery-page" aria-labelledby="site-state-title" role="status">
       <svg className="broken-path" viewBox="0 0 240 60" aria-hidden="true">
         <path d="M8 30h72m18 0h134M80 22l8 8-8 8m18-16-8 8 8 8" />
         <circle cx="8" cy="30" r="4" />
@@ -107,7 +107,10 @@ function SiteStatePanel({ meta }: { meta: Meta }) {
             ? "Layanan portal ini telah ditutup."
             : "Pembuatan akun sedang dihentikan sementara.")}
       </p>
-      <p className="muted">Muat ulang halaman untuk memeriksa status terbaru.</p>
+      <p className="muted">
+        Halaman ini memeriksa status portal secara berkala selama tab terbuka dan menampilkan portal
+        lagi begitu tersedia.
+      </p>
     </section>
   );
 }
@@ -170,7 +173,11 @@ function ServiceView({ meta, serviceId }: { meta: Meta; serviceId: string }) {
             >
               Coba lagi
             </button>
-          ) : null}
+          ) : (
+            <Link className="button-secondary" href="/">
+              Lihat server dan layanan lain
+            </Link>
+          )}
         </div>
       </section>
     );
@@ -201,7 +208,13 @@ function ServiceView({ meta, serviceId }: { meta: Meta; serviceId: string }) {
         </div>
       </div>
       <NoticeBanner meta={meta} />
-      <DurationCards days={days} selected={day} onSelect={setDay} meta={meta} serviceId={serviceId} />
+      <DurationCards
+        days={days}
+        selected={day}
+        onSelect={setDay}
+        meta={meta}
+        serviceId={serviceId}
+      />
       <section className="panel service-account-panel" aria-label="Buat akun">
         <div className="quota-summary-inline" style={quotaBoxStyle}>
           <h2 style={sectionHeadingStyle}>Kuota hari ini</h2>
