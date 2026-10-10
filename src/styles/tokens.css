@@ -12,9 +12,9 @@
   --warm-tint: color-mix(in srgb, var(--warm) 22%, #fff);
   --danger: #b42318;
   --line: color-mix(in srgb, var(--ink) 10%, #fff);
-  --radius: 12px;
-  --radius-lg: 20px;
-  --radius-pill: 999px;
+  --radius: 8px;
+  --radius-lg: 10px;
+  --radius-pill: 6px; /* name kept for existing references; no longer a full pill */
   --shadow-soft: 0 24px 80px rgb(24 51 69 / 0.12);
   /* --font-jakarta is injected by next/font in layout.tsx; the literal family name is a local fallback. */
   --font-sans: var(--font-jakarta), "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;

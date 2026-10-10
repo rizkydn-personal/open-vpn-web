@@ -15,22 +15,13 @@ export function PathLoader({ size = "md", label = "Memuat", decorative = false }
   );
   if (decorative) {
     return (
-      <span
-        className={`path-loader path-loader--${size}`}
-        aria-hidden="true"
-        style={{ color: "var(--primary)" }}
-      >
+      <span className={`path-loader path-loader--${size}`} aria-hidden="true">
         {svg}
       </span>
     );
   }
   return (
-    <span
-      className={`path-loader path-loader--${size}`}
-      role="status"
-      aria-label={label}
-      style={{ color: "var(--primary)" }}
-    >
+    <span className={`path-loader path-loader--${size}`} role="status" aria-label={label}>
       {svg}
       <span className="sr-only">{label}...</span>
     </span>
